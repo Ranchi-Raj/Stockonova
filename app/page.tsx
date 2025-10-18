@@ -29,11 +29,13 @@ import DBService from "@/appwrite/db"
           if(user){
             setSignIn();
             router.replace("/dashboard");
-             setLoading(false);
           }
         }
         catch(err){
           console.log("Not logged in",err);
+        }
+        finally{
+          setLoading(false);
         }
         
       }
