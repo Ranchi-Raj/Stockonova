@@ -9,7 +9,7 @@ import type { Expert } from "@/lib/data"
 import { format } from "date-fns"
 
 export function ExpertCard({ expert }: { expert: Expert }) {
-  const sessionDate = new Date(expert.upcomingIntroSession.date)
+  // const sessionDate = new Date(expert.upcomingIntroSession.date)
   return (
     <Card className="rounded-2xl shadow-md">
       <CardHeader className="flex flex-row items-center gap-4">
@@ -30,14 +30,14 @@ export function ExpertCard({ expert }: { expert: Expert }) {
           <Badge className="rounded-full bg-secondary text-secondary-foreground">{expert.specialization}</Badge>
           <span className="text-xs text-muted-foreground">{expert.experienceYears} yrs experience</span>
         </div>
-        <div className="rounded-xl bg-secondary p-3 text-sm">
+        {/* <div className="rounded-xl bg-secondary p-3 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Next Intro Session</span>
             <span className="font-medium">
               {format(sessionDate, "EEE, MMM d")} • {format(sessionDate, "p")}
             </span>
           </div>
-        </div>
+        </div> */}
       </CardContent>
       <CardFooter className="flex justify-between gap-2">
         <Link href={`/experts/${expert.id}`} className="w-full">

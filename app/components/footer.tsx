@@ -57,7 +57,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 text-xs text-muted-foreground">© Stocknova 2025</div>
+        <div className="mt-8 text-xs text-muted-foreground text-center">© Stocknova 2025</div>
       </div>
     </footer>
   )

@@ -1,8 +1,14 @@
+"use client"
+
 import { NavBar } from "@/app/components/navbar"
 import { Footer } from "@/app/components/footer"
 import { ExpertGridClient } from "@/app/components/expert-grid-client"
-
+import { useAuth } from "@/hooks/useAuth"
+import { useUserStore } from "@/store/counterStore"
 export default function ExpertsPage() {
+  useAuth();
+  const user = useUserStore((state) => state.user);
+  console.log("Zustand User",user);
   return (
     <main>
       <NavBar />

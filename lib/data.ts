@@ -15,9 +15,9 @@ export type Expert = {
   experienceYears: number
   photoUrl?: string
   bio: string
-  expertiseAreas: string[]
-  upcomingIntroSession: Session
-  oneOnOneSlots: string[] // ISO date strings
+  expertiseAreas?: string[]
+  upcomingIntroSession?: Session
+  oneOnOneSlots?: string[] // ISO date strings
 }
 
 export const specializations = [
