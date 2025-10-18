@@ -1,5 +1,5 @@
 const conf = {
-    appUrl : "stocknova.co.in",
+    appUrl : "https://stocknova.co.in",
     // appUrl : "https://stockonova.vercel.app",
     // appUrl : "https://stockonova.com",
     appwriteUrl: String(process.env.NEXT_PUBLIC_APPWRITE_URL),
