@@ -1,6 +1,7 @@
 import conf from '../conf/conf'
 import { Client, Databases, Account, ID, Query } from 'appwrite';
 import { SessionInterface } from '../interfaces/interface'
+
 class DBService{
     client = new Client();
     databases;
@@ -111,7 +112,7 @@ class DBService{
         }
     }
 
-    async addRequest({userId ,name, email, sebiId, experience, specialization, bio} : {userId: string, name: string, email: string, sebiId: string, experience: number, specialization: string, bio: string}){
+    async addRequest({userId ,name, email, sebiId, experience, specialization, bio, phone} : {userId: string, name: string, email: string, sebiId: string, experience: number, specialization: string, bio: string, phone: string}){
         try{
             const data = await this.databases.createDocument(
                 conf.appwriteDatabaseId, conf.appwriteRequestId, ID.unique(), {
@@ -122,7 +123,17 @@ class DBService{
                 experience: experience,
                 specialization: specialization,
                 bio: bio,
+                phone : phone
             });
+
+            await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                userId,
+                {
+                    phone : phone
+                }
+            );
             console.log(data);
             return data;
         }
@@ -285,6 +296,22 @@ class DBService{
                     intros: [...intros, expertId]
                 }
             );
+
+            const res = await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                expertId                
+            );
+
+            await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                expertId,
+                {
+                    introUsersToSave : [...(res.introUsersToSave || []), id]
+                }
+            );
+            
             return resp;
         }
         catch(err){
@@ -293,11 +320,11 @@ class DBService{
         }
     }
 
-   async scheduleSession({
-            title,date,time,duration,fee,expertId,sebiID
+    async scheduleSession({
+            title,date,time,duration,fee,expertId,sebiID, tag
             }: {
-            title: string,date: string,time: string,duration: number,fee: number,expertId: string
-            ,sebiID: string
+            title: string,date: string,time: string,duration?: number,fee: number,expertId: string
+            ,sebiID: string, tag?: string
         }) {
         try {
             // Create the new session
@@ -311,7 +338,8 @@ class DBService{
                 time,
                 duration,
                 fee,
-                expertId
+                expertId,
+                tag
             }
             );
             console.log("Sebi id at time of creating session", sebiID);
@@ -328,7 +356,7 @@ class DBService{
 
             console.log("Updated sessions array:", sebi.sessions);  
             // Update SEBI document
-            const resp2 = await this.databases.updateDocument(
+            await this.databases.updateDocument(
             conf.appwriteDatabaseId,
             conf.appwriteSebiId, // ← ensure this is the SEBI collection ID
             sebiID,
@@ -337,24 +365,56 @@ class DBService{
             }
             );
 
-            console.log("SEBI updated with new session:", resp2);
-            return resp2;
+            
+            return resp;
         } catch (err) {
             console.log(err);
             return err;
         }
     }
 
+    async getIntroUserToSave(expertId: string){ 
+        try{
+            const resp = await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                expertId
+            );
+            return resp.introUsersToSave;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async addIntroUserToSave(expertId: string, userId: string){ 
+        try{
+            const sebi = await this.getSebiById(expertId) as {
+                introUsersToSave : string[]
+            };
+            sebi.introUsersToSave = [...sebi.introUsersToSave, userId];
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                expertId,
+                {
+                    introUsersToSave : sebi.introUsersToSave
+                }
+            );
+            return resp;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
 
     async getSessionsBySebiId(sebiID: string){
         try{
             const data = await this.getSebiById(sebiID) as {
                 sessions: string[]
             };
-            console.log("Session By Sebi Id obtained",data);
-
-            const user = await this.getUserbyId("68ef4409003b03f3ae94");
-            console.log("User obtained",user);
 
             // If there are no sessions, return an empty array
             if (!data || !data.sessions || data.sessions.length === 0) {
@@ -363,6 +423,32 @@ class DBService{
             const sessionsList : SessionInterface[] = [];
             await Promise.all(
                 data.sessions.map(sessionId => this.getSessionById(sessionId) as Promise<SessionInterface>)
+            ).then(sessions => {
+                console.log("Sessions obtained",sessions);
+                sessionsList.push(...sessions);
+            });
+            // Ensure there is at least one document and it has a sessions property
+            return sessionsList.length > 0 ? sessionsList : [];
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async getPastSessionsBySebiId(sebiID: string){
+        try{
+            const data = await this.getSebiById(sebiID) as {
+                pastSessions: string[]
+            };
+
+            // If there are no sessions, return an empty array
+            if (!data || !data.pastSessions || data.pastSessions.length === 0) {
+                return [];
+            }
+            const sessionsList : SessionInterface[] = [];
+            await Promise.all(
+                data.pastSessions.map(sessionId => this.getSessionById(sessionId) as Promise<SessionInterface>)
             ).then(sessions => {
                 console.log("Sessions obtained",sessions);
                 sessionsList.push(...sessions);
@@ -397,6 +483,9 @@ class DBService{
             const session = await this.getSessionById(sessionId) as {
                 users: string[]
             };
+
+            console.log("Current session :", session);
+
             const resp = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteSessionsId,
@@ -445,10 +534,124 @@ class DBService{
             return err;
         }
     }
+
+    async updateEarnings(sebiID: string, amount: number){
+        try{
+            const sebi = await this.getSebiById(sebiID) as {
+                earnings: number
+            };
+            const newEarnings = (sebi.earnings || 0) + amount;
+            await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                sebiID,
+                {
+                    earnings: newEarnings
+                }
+            );
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async getEarnings(sebiID: string){
+        try{
+            const sebi = await this.getSebiById(sebiID) as {
+                earnings: number
+            };
+            return sebi.earnings || 0;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async markSessionAsComplete(sessionId: string, sebiID: string){
+        try{
+            const sebi = await this.getSebiById(sebiID) as{
+                sessions: string[],
+                pastSessions: string[]
+            };
+            sebi.sessions = sebi.sessions.filter(id => id !== sessionId);
+            sebi.pastSessions.push(sessionId);
+            await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                sebiID,
+                {
+                    sessions: sebi.sessions,
+                    pastSessions: sebi.pastSessions
+                }
+            );
+
+            const data = await this.getSessionById(sessionId);
+            await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSessionsId,
+                sessionId,
+                {
+                    status: 'completed'
+                }
+            );
+            return data;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async getAllSessions(){
+        try{
+            const resp = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteSessionsId,
+                [
+                    Query.orderDesc('$createdAt')
+                ]
+            );
+            console.log(resp.documents);
+            // Return the array of session documents (each item is a session document)
+            return resp.documents;
+        } catch(err) {
+            console.log(err);
+            return err;
+        }
+    }
+
+    async endIntroSession(sebiId : string){
+        await this.databases.updateDocument(
+            conf.appwriteDatabaseId,
+            conf.appwriteSebiId,
+            sebiId,
+            {
+                intro: JSON.stringify({
+                    title : "",
+                    time : "",
+                    date : ""
+                })
+            }
+        );
+    }
+
+    async addIntroSession(sebiId : string, intro : string){
+        const res = await this.databases.updateDocument(
+            conf.appwriteDatabaseId,
+            conf.appwriteSebiId,
+            sebiId,
+            {
+                intro: intro
+            }
+        );  
+
+        console.log("Intro session added:", res);
+        return res;
+    }
+
 }
-
-// ----------------------------------
-
 
 
 const dbClient = new DBService();

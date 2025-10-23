@@ -13,9 +13,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 // import { useToast } from "@/hooks/use-toast"
-import { toast } from "react-hot-toast"
 import Razorpay from "./razorpay"
+import DBService from "@/appwrite/db"
+
 export function BookingModal({
+  sebiId,
   trigger,
   title,
   description,
@@ -25,6 +27,7 @@ export function BookingModal({
   phone,
   amount 
 }: {
+  sebiId : string,
   trigger: React.ReactNode
   title: string
   description: string
@@ -60,7 +63,12 @@ export function BookingModal({
           >
             {onConfirmText}
           </Button> */}
-          <Razorpay amount={amount} name={name} phone={phone} buttonText={onConfirmText} handleOrder={handleBooking} />
+          <Razorpay amount={amount} name={name} phone={phone} buttonText={onConfirmText} handleOrder={async () => {
+            await handleBooking()
+            if(amount && amount > 0 && sebiId){
+              await DBService.updateEarnings(sebiId, amount)
+            }
+          }} />
 
         </div>
       </DialogContent>

@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookingModal } from "@/app/components/booking-modal"
 import { format } from "date-fns"
-import { useEffect, useState, use } from "react"
+import { useEffect, useState} from "react"
 import { useRouter } from "next/navigation"
 import DBService from "@/appwrite/db"
 import HomePageSkeleton from "@/app/components/skeleton"
@@ -23,6 +23,7 @@ interface Expert {
   email: string
   phone: string
   expert: boolean
+  sebi : string
   sebiId: string
   specialization: string
   experience: number
@@ -31,6 +32,7 @@ interface Expert {
   intros?: string[]
   expertiseAreas?: string[]
   oneOnOneSlots?: string[]
+  intro : {$id : string, title : string, date : string, time : string}
 }
 interface Sebi{
   $id: string
@@ -81,6 +83,11 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           notFound()
         }
 
+        const intro = await DBService.getSebiById(expertData.sebi.$id) as {
+          intro : string
+        }
+        
+
         // Transform the data to match expected format
         const transformedExpert: Expert = {
           $id: expertData.$id,
@@ -88,10 +95,12 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           email: expertData.email,
           phone: expertData.phone,
           expert: expertData.expert,
+          sebi : expertData.sebi.$id,
           sebiId: expertData.sebi.sebiId,
           specialization: expertData.sebi.specialization,
           experience: expertData.sebi.experience,
           bio: expertData.sebi.bio,
+          intro : JSON.parse(intro.intro),
           // photoUrl: expertData.sebi.photoUrl,
           // intros: expertData.intros || [],
           // expertiseAreas: expertData.expertiseAreas || [expertData.specialization],
@@ -129,16 +138,25 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
     fee: 199
   }
 
-  const introDate = new Date(upcomingIntroSession.date)
+  // const introDate = new Date(upcomingIntroSession.date)
   const bookIntro = async () => {
     try {
       // Call your booking API or function here
-      await DBService.addIntroInUser({
-        id : user!.$id,
-        expertId : expert.$id,
-        // sebiId : expert.sebi.$id,
-        intros : user?.intros || []
-      })
+      // await DBService.addIntroInUser({
+      //   id : user!.$id,
+      //   expertId : expert.$id,
+      //   // sebiId : expert.sebi.$id,
+      //   intros : user?.intros || []
+      // })
+
+      console.log("Session to be booked:", expert.intro.$id, "for user", user!.$id)
+
+      // await DBService.addUserToSession({
+      //   sessionId: expert.intro.$id,
+      //   userId: user!.$id
+      // })
+      console.log("Expert intro id:", expert.$id, "User id:", user!.$id)
+      await DBService.addIntroUserToSave(expert.sebi, user!.$id)
 
       // TODO : Send email to user with meeting link
 
@@ -189,7 +207,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         {/* Header */}
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
           <Image
-            src={expert.photoUrl || "/placeholder.svg?height=96&width=96&query=expert%20photo"}
+            src={expert.photoUrl || "/pic.png"}
             alt={`Photo of ${expert.name}`}
             width={96}
             height={96}
@@ -225,26 +243,33 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           {/* Introductory Session */}
           {
             !subscribed ? 
-         
           <Card className="rounded-2xl p-6">
-            <h2 className="text-lg font-semibold">Introductory Session</h2>
+            <h2 className="text-lg font-semibold">{expert.intro.title ? "Introductory Session on " + expert.intro.title : "Not Introductory Session has been Scheduled for the time being."}</h2>
+            {
+              expert.intro.title &&
+              <div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {format(introDate, "EEE, MMM d")} • {format(introDate, "p")} • {upcomingIntroSession.durationMins}{" "}
-              mins
-            </p>
+              
+              {format(new Date(expert.intro.date), "EEE, MMM d")} • {expert.intro.time} Hours
+              
+               {/* • {upcomingIntroSession.durationMins}{" "} mins */}
             <div className="mt-3 text-sm">
               Fee: <span className="font-medium">₹{upcomingIntroSession.fee}</span>
             </div>
+            </p>
             <div className="mt-4">
               <BookingModal
+                sebiId={expert.sebi}
                 name={user?.name}
                 amount={199}
                 title="Book Introductory Session"
                 bookIntro={bookIntro}
                 description="Confirm your ₹199 intro session. You will receive an email with the meeting link."
                 trigger={<Button className="w-full rounded-2xl">Book Introductory Session</Button>}
-              />
+                />
+              </div>
             </div>
+              }
           </Card>
           : 
           <Card className="rounded-2xl p-6 flex items-center justify-center">
@@ -276,8 +301,11 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         {sessions && sessions.length > 0 ? (
           sessions.map((slot, index) => {
             const d = new Date(slot.date);
+            if(slot.tag == 'oneToOne')
+          {
             return (
               <BookingModal
+                sebiId={expert.sebi}
                 amount={slot.fee}
                 name={user?.name}
                 // phone={user?.phone}
@@ -347,6 +375,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                 bookIntro={() => bookOneOnOne(slot.$id,user!.$id)}
               />
             );
+          }
           })
         ) : (
           <p className="text-sm text-muted-foreground col-span-full text-center py-8 border rounded-xl bg-muted/20">

@@ -40,6 +40,7 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
     sebiId: "",
     bio: "",
     experience: "",
+    phone: "",
     specialization: "",
   })
 
@@ -71,6 +72,7 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
       specialization: formData.specialization,
       bio: formData.bio,
       userId : (account as { $id?: string }).$id || "" ,
+      phone : formData.phone
     })
 
     console.log("Request submitted:", data)
@@ -82,6 +84,7 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
       bio: "",
       experience: "",
       specialization: "",
+      phone: "",
     })
   }
 
@@ -111,6 +114,17 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
               placeholder="Enter your SEBI registration ID"
               value={formData.sebiId}
               onChange={(e) => handleInputChange("sebiId", e.target.value)}
+              required
+            />
+          </div>
+          {/* Phone Number */}
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              placeholder="Enter your phone number"
+              value={formData.phone}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               required
             />
           </div>

@@ -9,6 +9,8 @@ export interface SessionInterface {
   createdAt: string
   registered? : boolean
   users : string[]
+  expertId? : string
+  tag? : 'introductory' | 'oneToOne'
   // sessions : string[]
 }
 

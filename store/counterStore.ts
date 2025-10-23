@@ -13,13 +13,13 @@ interface User {
   // Add other user properties if needed
 }
 
-interface Sebi {
-  $id: string;
-  name: string;
-  earnings: number;
+// interface Sebi {
+//   $id: string;
+//   name: string;
+//   earnings: number;
   
-  // Add other sebi properties if needed
-}
+//   // Add other sebi properties if needed
+// }
 
 // Default user (optional placeholder)
 const defaultUser: User = {

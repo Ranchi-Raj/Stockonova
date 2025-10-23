@@ -17,7 +17,7 @@ interface User {
   // Add other user properties if needed
 }
 // Custom hook to check authentication status and redirect if not authenticated
-export function useAuth(redirectUrl = "/") {
+export function useAuth(redirectUrl = "/login") {
   const router = useRouter();
   const setSignIn = useSignInStore((state) => state.signIn);
   const setUser = useUserStore((state) => state.setUser);

@@ -12,35 +12,40 @@ export function Footer() {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold">Company</h3>
-            <ul className="mt-2 space-y-2 text-sm">
-              <li>
-                <Link className="text-muted-foreground hover:text-foreground" href="/about">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link className="text-muted-foreground hover:text-foreground" href="/contact">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
+  <h3 className="text-sm font-semibold">Company</h3>
+  <ul className="mt-2 space-y-2 text-sm">
+    <li>
+      <Link className="text-muted-foreground hover:text-foreground" href="/about#about">
+        About
+      </Link>
+    </li>
+    <li>
+      <Link className="text-muted-foreground hover:text-foreground" href="/about#contact">
+        Contact
+      </Link>
+    </li>
+  </ul>
+          </div>  
           <div>
-            <h3 className="text-sm font-semibold">Legal</h3>
-            <ul className="mt-2 space-y-2 text-sm">
-              <li>
-                <Link className="text-muted-foreground hover:text-foreground" href="/terms">
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link className="text-muted-foreground hover:text-foreground" href="/privacy">
-                  Privacy
-                </Link>
-              </li>
-            </ul>
-          </div>
+  <h3 className="text-sm font-semibold">Legal</h3>
+  <ul className="mt-2 space-y-2 text-sm">
+    <li>
+      <Link className="text-muted-foreground hover:text-foreground" href="/about#terms">
+        Terms
+      </Link>
+    </li>
+    <li>
+      <Link className="text-muted-foreground hover:text-foreground" href="/about#privacy">
+        Privacy
+      </Link>
+    </li>
+    <li>
+      <Link className="text-muted-foreground hover:text-foreground" href="/about#disclaimer">
+        Disclaimer
+      </Link>
+    </li>
+  </ul>
+</div>
           <div>
             <h3 className="text-sm font-semibold">Get Started</h3>
             <ul className="mt-2 space-y-2 text-sm">
@@ -50,9 +55,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link className="text-muted-foreground hover:text-foreground" href="/signup">
+                {/* <Link className="text-muted-foreground hover:text-foreground" href="/signup">
                   Become an Expert
-                </Link>
+                </Link> */}
               </li>
             </ul>
           </div>

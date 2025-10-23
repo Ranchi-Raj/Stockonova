@@ -12,10 +12,10 @@ import { toast } from "react-hot-toast"
 import { useRouter } from "next/navigation"
 
 const links = [
-  { href: "/home", label: "Home" },
+  { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/experts", label: "Experts" },
-  { href: "/", label: "Login" },
+  { href: "/login", label: "Login" },
   { href: "/signup", label: "Signup" },
 ]
 

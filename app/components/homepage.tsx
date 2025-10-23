@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 import { Tv, SquareDashedBottomCode, BookLock } from "lucide-react"
-// import { useRouter } from "next/navigation";
+
 export default function HomePage() {
-  // const router = useRouter();
   return (
     <main>
       <NavBar />
+      
       {/* Hero Section */}
       <section className="border-b bg-card">
         <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
@@ -92,9 +92,9 @@ export default function HomePage() {
           <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
             Join thousands of investors who are making informed decisions with guidance from SEBI-registered professionals.
           </p>
-          <Link href="/login">
-            <Button size="lg" className="rounded-2xl" >
-              Login and Find Your Expert Today
+          <Link href="/experts">
+            <Button size="lg" className="rounded-2xl">
+              Find Your Expert Today
             </Button>
           </Link>
         </div>

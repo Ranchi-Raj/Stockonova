@@ -102,7 +102,7 @@ function ExpertCard({ expert }: { expert: Expert }) {
     <Card className="rounded-2xl shadow-md">
       <CardHeader className="flex flex-row items-center gap-4">
         <Image
-          src={expert.photoUrl || "/placeholder.svg?height=80&width=80&query=expert%20photo"}
+          src={expert.photoUrl || "/pic.png"}
           alt={`Photo of ${expert.name}`}
           width={64}
           height={64}

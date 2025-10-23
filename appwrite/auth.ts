@@ -72,7 +72,7 @@ export class AuthService{
             this.account.createOAuth2Session({
                 provider: OAuthProvider.Google ,
                 success: `${conf.appUrl}/dashboard`,
-                failure: `${conf.appUrl}/`
+                failure: `${conf.appUrl}/login`
             });
         }
         catch(error){
