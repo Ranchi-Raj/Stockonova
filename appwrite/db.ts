@@ -241,6 +241,11 @@ class DBService{
         try{
             const data = await this.databases.createDocument(
                 conf.appwriteDatabaseId, conf.appwriteSebiId, ID.unique(), {
+                intro : JSON.stringify({
+                    title : "",
+                    time : "",
+                    date : ""
+                }),
                 userId: userId,
                 sebiId: sebiId,
                 // verified: verified,
