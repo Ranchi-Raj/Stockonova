@@ -242,6 +242,7 @@ class DBService{
             const data = await this.databases.createDocument(
                 conf.appwriteDatabaseId, conf.appwriteSebiId, ID.unique(), {
                 intro : JSON.stringify({
+                    $id : "",
                     title : "",
                     time : "",
                     date : ""
