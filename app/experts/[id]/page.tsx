@@ -157,7 +157,17 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       // })
       console.log("Expert intro id:", expert.$id, "User id:", user!.$id)
       await DBService.addIntroUserToSave(expert.sebi, user!.$id)
-
+      await DBService.addUserToSession({
+        sessionId: expert.intro.$id,
+        userId: user!.$id})
+      await DBService.addIntroInUser(
+        {
+          id : user!.$id,
+          expertId : params.id,
+          sebiId : expert.sebi,
+          intros : user?.intros || []
+        }
+      )
       // TODO : Send email to user with meeting link
 
       // On success:
@@ -191,6 +201,9 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           return session
         })
       })
+      // Add the session to user's registered sessions
+
+      await DBService.addRegisteredSessionToUser(user!.$id, sessionId)
       // TODO : Send email to user with meeting link
       toast.success("1:1 session booked successfully!")
     }

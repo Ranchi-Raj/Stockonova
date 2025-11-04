@@ -37,7 +37,8 @@ export default function ExpertPanel() {
     time: '',
     date: ''
   })
-
+  const [minFee, setMinFee] = useState(0)
+  const [maxFee, setMaxFee] = useState(0)
   // New session form state
   const [newSession, setNewSession] = useState({
     title: '',
@@ -70,6 +71,13 @@ export default function ExpertPanel() {
       console.log("Fetching sessions for SEBI ID:", user?.sebi)
       const sessions = await DBService.getSessionsBySebiId(user?.sebi || "")
       const passed = await DBService.getPastSessionsBySebiId(user?.sebi || "")
+      const fees = await DBService.getSebiById(user?.sebi || "") as {
+        min : number,
+        max : number
+      };
+      console.log("Min fee:", fees.min, "Max fee:", fees.max);
+      setMinFee(fees.min);
+      setMaxFee(fees.max);
       console.log("Fetched sessions:", sessions)
       const mockSessions: Session[] = [
       ]
@@ -134,8 +142,11 @@ export default function ExpertPanel() {
   }
 
   const handleCreateSession = async (e: React.FormEvent) => {
-
     e.preventDefault()
+    if(newSession.fee < minFee || newSession.fee > maxFee){
+      toast.error(`Fee must be between ${minFee} and ${maxFee}`);
+      return;
+    }
     try {
       console.log("Creating session with data:", newSession, "for user:", user)
       setLoading(true)
@@ -361,6 +372,8 @@ export default function ExpertPanel() {
                       type="number"
                       min="0"
                       step="0.01"
+                      minLength={minFee}
+                      maxLength={maxFee}
                       value={newSession.fee}
                       onChange={(e) => setNewSession(prev => ({ ...prev, fee: parseFloat(e.target.value) }))}
                       required
@@ -685,7 +698,7 @@ function RegistrationDialog({ session, trigger }: RegistrationDialogProps) {
 }
 
 function IntroductorySessionDialog({ sebi, sebiId , setIntro}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>}) {
-  console.log("Sebi ID in IntroductorySessionDialog:", sebiId);
+  // console.log("Sebi ID in IntroductorySessionDialog:", sebiId);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');

@@ -1,5 +1,5 @@
 const conf = {
-    appUrl : "https://stocknova.co.in",
+    appUrl : String(process.env.NEXT_PUBLIC_REDIRECT_LINK),
     // appUrl : "http://localhost:3000",
     // appUrl : "https://stockonova.com",
     appwriteUrl: String(process.env.NEXT_PUBLIC_APPWRITE_URL),

@@ -42,23 +42,30 @@ export default function SignUp() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    if(details.password !== details.confirmPassword){
-      toast.error("Passwords do not match");
-      return;
-    }
-    console.log("Form submitted");
-    const data = await Auth.signup({
-      email: details.email,
-      password: details.password,
-      name: details.firstName + " " + details.lastName,
-      phone: details.phoneNumber,
-    });
 
-    console.log(data);
-    setSignIn();
-    toast.success("Account created successfully");
-    router.replace("/dashboard");
+    try{
+
+      // Handle form submission logic here
+      if(details.password !== details.confirmPassword){
+        toast.error("Passwords do not match");
+        return;
+      }
+      console.log("Form submitted");
+      const data = await Auth.signup({
+        email: details.email,
+        password: details.password,
+        name: details.firstName + " " + details.lastName,
+        phone: details.phoneNumber,
+      });
+      
+      console.log(data);
+      setSignIn();
+      toast.success("Account created successfully");
+      router.replace("/dashboard");
+    }catch(err){
+      console.log(err);
+      toast.error("Error creating account");
+    }
 
   }
   return (
@@ -87,7 +94,7 @@ export default function SignUp() {
                 <Input className="rounded-2xl" placeholder="Last Name" type="text" value={details.lastName} onChange={(e) => setDetails({ ...details, lastName: e.target.value })} />
               </div>
               <Input className="rounded-2xl" placeholder="Email" type="email" value={details.email} onChange={(e) => setDetails({ ...details, email: e.target.value })} />
-              <Input className="rounded-2xl" placeholder="Phone Number" type="tel" value={details.phoneNumber} onChange={(e) => setDetails({ ...details, phoneNumber: e.target.value })} />
+              <Input required className={`rounded-2xl ${(details.phoneNumber.length === 10 || details.phoneNumber.length === 0) ? "border-green-500" : "border-red-500"}`} placeholder="Phone Number" type="tel" value={details.phoneNumber} onChange={(e) => setDetails({ ...details, phoneNumber: e.target.value })} />
               <Input className="rounded-2xl" placeholder="Password" type="password" value={details.password} onChange={(e) => setDetails({ ...details, password: e.target.value })} />
               <Input className={`rounded-2xl border-2 ${details.confirmPassword === details.password ? "border-green-500" : "border-red-500"}`} placeholder="Confirm Password" type="password" value={details.confirmPassword} onChange={(e) => setDetails({ ...details, confirmPassword: e.target.value })} />
               {/* <Input className="rounded-2xl" placeholder="SEBI Registration Number" type="text" /> */}

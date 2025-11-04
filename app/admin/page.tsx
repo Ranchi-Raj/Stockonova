@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { SessionInterface } from "@/interfaces/interface"
 import CheckUserModal from "../components/checkUserModal"
 import { Badge } from "@/components/ui/badge"
+import SetThreshold from "../components/setThreshold"
 
 interface Request {
     id: string
@@ -253,7 +254,10 @@ export default function AdminPage() {
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <div className="flex items-center gap-4">
                 <CheckUserModal/>
+                <SetThreshold />
+                </div>
                 {/* <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
                     <i className="bi bi-shield-check"></i>
                     <span>Admin Mode</span>

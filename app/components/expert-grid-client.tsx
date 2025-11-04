@@ -16,11 +16,10 @@ interface Expert {
   email: string
   expert: boolean
   intros?: string[]
-  // sebi: string
   specialization?: string
   experience?: number
   photoUrl?: string
-  sebiId : string
+  sebiId: string
 }
 
 type Filters = {
@@ -30,26 +29,24 @@ type Filters = {
   date: string
 }
 
-interface Sebi{
+interface Sebi {
   $id: string
   sebiId: string
   verified: boolean
-  bio : boolean
-  earning : number
-  experience : number
-  specialization : string
+  bio: boolean
+  earning: number
+  experience: number
+  specialization: string
 }
 
-interface User{
+interface User {
   $id: string
   name: string
   email: string
   phone: string
-  sebi : Sebi
+  sebi?: Sebi // Made optional with ?
   expert: boolean
 }
-
-
 
 function matchesExperience(expYears: number, expFilter: string) {
   if (expFilter === "Any") return true
@@ -157,19 +154,16 @@ export function ExpertGridClient() {
 
         console.log("Fetched experts:", data);
         const expertUsers = data
-          .filter(user => user.expert === true)
+          .filter(user => user.expert === true && user.sebi) // Only include users with sebi object
           .map(user => ({
             $id: user.$id,
             name: user.name,
             phone: user.phone,
             email: user.email,
             expert: user.expert,
-            // intros: user.intros || [],
-            // sebi: user.sebi || user.sebiId || "N/A",
-            sebiId: user.sebi.sebiId || "N/A",
-            specialization: user.sebi.specialization || "N/A",
-            experience: user.sebi.experience ? user.sebi.experience : 0,
-            // photoUrl: user.photoUrl, 
+            sebiId: user.sebi?.sebiId || "N/A", // Safe access with optional chaining
+            specialization: user.sebi?.specialization || "General",
+            experience: user.sebi?.experience || 0,
           }));
         setExperts(expertUsers);
       } catch (error) {

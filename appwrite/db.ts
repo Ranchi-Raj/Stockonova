@@ -81,7 +81,8 @@ class DBService{
                 conf.appwriteDatabaseId,
                 conf.appwriteUserId,
                 [
-                    Query.equal('expert', true)
+                    Query.equal('expert', true),
+                    Query.orderDesc('$updatedAt')
                 ]
             );
             console.log(resp.documents);
@@ -292,7 +293,7 @@ class DBService{
     }
 
     // Add the expert user ID in the users who have watched the expert intro video
-    async addIntroInUser({id, expertId, intros} : {id: string, expertId: string, intros: string[]}){
+    async addIntroInUser({id, expertId, sebiId, intros} : {id: string, expertId: string, sebiId : string, intros: string[]}){
         try{
             const resp = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
@@ -306,13 +307,13 @@ class DBService{
             const res = await this.databases.getDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteSebiId,
-                expertId                
+                sebiId                
             );
 
             await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteSebiId,
-                expertId,
+                sebiId,
                 {
                     introUsersToSave : [...(res.introUsersToSave || []), id]
                 }
@@ -657,6 +658,80 @@ class DBService{
         return res;
     }
 
+    async getUserRegisteredSessions(userId: string){
+        try{
+            const resp = await this.databases.getDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                userId
+            );
+            console.log(resp.sessions);
+            return resp.sessions;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async addRegisteredSessionToUser(userId: string, sessionId: string){
+        try{
+            const sessions = await this.getUserRegisteredSessions(userId) as string[];
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                userId,
+                {
+                    sessions: [...(sessions || []), sessionId]
+                }
+            );
+            console.log(resp);
+            return resp;
+        }
+        catch(err){
+            console.log(err); 
+            return err;
+        }
+    }
+
+    async updateUserUpcomingSessions(userId: string, sessions: string[]){
+        try{
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                userId,
+                {
+                    sessions: sessions
+                }
+            );
+            console.log(resp);
+            return resp;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async updateThreshold(expertId: string, min: number, max: number){
+        try{
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId,
+                expertId,
+                {
+                    min : min,
+                    max : max
+                }
+            );
+            console.log(resp);
+            return resp;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
 }
 
 
