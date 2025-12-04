@@ -12,6 +12,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignInStore } from "@/store/counterStore"
 import HomePageSkeleton from "../components/skeleton"
+// import AuthService  from "@/appwrite/auth"
 // import DBService from "@/appwrite/db"
 
   export default function LoginPage() {
@@ -75,6 +76,20 @@ import HomePageSkeleton from "../components/skeleton"
       }
       // Setting the data to zustand store will be handled in dashboard page after redirect
     
+      const handleForgotPassword = async () => {
+        // Handle forgot password logic here
+        try{
+          if(!email){
+            toast.error("Please enter your email first");
+            return;
+          }
+          await Auth.sendPasswordReset(email)
+          console.log("Forgot Password clicked");
+        }
+        catch(err){
+          console.log("Error in sending password reset", err);
+        }
+      }
 
     if(loading){
       return <HomePageSkeleton/>
@@ -140,10 +155,10 @@ import HomePageSkeleton from "../components/skeleton"
                     Sign up
                   </Link>
                 </div>
-              <div className="mt-4 flex items-center justify-end text-sm">
-                <Link className="text-muted-foreground hover:text-foreground" href="#">
+              <div className="mt-4 flex items-center justify-center text-sm">
+                <Button className="text-muted-foreground hover:text-foreground" onClick={handleForgotPassword} variant="link">
                   Forgot Password?
-                </Link>
+                </Button>
               </div>
             </div>
           </div>

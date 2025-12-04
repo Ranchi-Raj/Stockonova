@@ -11,6 +11,7 @@ export interface SessionInterface {
   users : string[]
   expertId? : string
   tag? : 'introductory' | 'oneToOne'
+  gmeet? : string
   // sessions : string[]
 }
 

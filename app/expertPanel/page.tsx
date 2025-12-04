@@ -11,12 +11,15 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Calendar, Clock, Plus, Video, User, Shield, TrendingUp, IndianRupee} from "lucide-react"
+import { Calendar, Clock, Plus, Video, User, Shield, TrendingUp, IndianRupee,} from "lucide-react"
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
 import DBService from '@/appwrite/db'
 import { SessionInterface as Session } from '@/interfaces/interface'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import axios from 'axios'
+import Skeleton  from '@/app/components/skeleton'
+// import { checkFile } from '@/lib/checkFile'
 
 export default function ExpertPanel() {
   useAuth();
@@ -26,6 +29,7 @@ export default function ExpertPanel() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [showNewSessionForm, setShowNewSessionForm] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [screenLoading, setScreenLoading] = useState(true)
   const [intro, setIntro] = useState<{
     $id : string,
     title : string,
@@ -51,7 +55,7 @@ export default function ExpertPanel() {
   })
   const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [registeredUsers, setRegisteredUsers] = useState<number>(-1)
-
+  const [connect, setConnect] = useState(false)
   // Call useAuth hook for authentication
   // console.log("User in ExpertPanel:", user)
   
@@ -66,6 +70,7 @@ export default function ExpertPanel() {
   const fetchSessions = async () => {
     try {
       setLoading(true)
+      setScreenLoading(true)
       // Replace with actual API call
       console.log("User", user)
       console.log("Fetching sessions for SEBI ID:", user?.sebi)
@@ -104,7 +109,7 @@ export default function ExpertPanel() {
 
       setSessions(Array.isArray(sessions) && sessions.length > 0 ? sessions : mockSessions)
       setPastSessions(Array.isArray(passed) ? passed.length > 0 ? passed : [] : [])
-      
+      setScreenLoading(false);
     } catch (error) {
       console.error('Error fetching sessions:', error)
       toast.error('Failed to fetch sessions')
@@ -112,7 +117,6 @@ export default function ExpertPanel() {
       setLoading(false)
     }
   }
-
 
   const checkExpiredSessions = async () => {
   const now = new Date()
@@ -124,7 +128,7 @@ export default function ExpertPanel() {
   if (expiredSessions.length > 0) {
     await removeExpiredSessions(expiredSessions)
   }
-}
+  }
 
   const removeExpiredSessions = async (expiredSessions: Session[]) => {
     try {
@@ -142,6 +146,7 @@ export default function ExpertPanel() {
   }
 
   const handleCreateSession = async (e: React.FormEvent) => {
+
     e.preventDefault()
     if(newSession.fee < minFee || newSession.fee > maxFee){
       toast.error(`Fee must be between ${minFee} and ${maxFee}`);
@@ -151,17 +156,6 @@ export default function ExpertPanel() {
       console.log("Creating session with data:", newSession, "for user:", user)
       setLoading(true)
       // Replace with actual API call
-      const sessionScheduled = await DBService.scheduleSession({
-        title : newSession.title,
-        date : newSession.date,
-        time : newSession.time,
-        duration : newSession.duration,
-        fee : newSession.fee,
-        expertId : user?.$id || "",
-        sebiID : user?.sebi || ""
-      })
-
-      console.log("Session scheduled:", sessionScheduled)
       const session: Session = {
         $id: Date.now().toString(),
         ...newSession,
@@ -170,9 +164,55 @@ export default function ExpertPanel() {
         createdAt: new Date().toISOString(),
         users : []
       }
-      
-      setSessions(prev => [session, ...prev])
-      setNewSession({
+
+        const res = await fetch("/api/google/check");
+        const data2 = await res.json();
+
+        if (!data2.exists) {
+          // No refresh token yet → redirect to Google OAuth
+          window.location.href = "/api/google/auth";
+        }
+
+      console.log("Google Auth initiated....");
+
+      // Create an event in Google Calendar and Gmeet session
+
+        // const data = await axios.post('/api/schedule-meet', { 
+        //   summary: ` Session on: ${session.title} by Expert: ${user!.name}`,
+        //   description: `Session with expert ${user!.name}`,
+        //   startDateTime: new Date(session.date + "T" + session.time).toISOString(),
+        //   endDateTime: new Date(new Date(session.date + "T" + session.time).getTime() + session.duration * 60000).toISOString(),
+        //   attendeesList: []
+        // })
+        // const meetLink = data.data.eventId;
+        
+        // console.log("Data from scheduling meet:", data.data);
+        // const sessionScheduled = await DBService.scheduleSession({
+        //   title : newSession.title,
+        //   date : newSession.date,
+        //   time : newSession.time,
+        //   duration : newSession.duration,
+        //   fee : newSession.fee,
+        //   expertId : user?.$id || "",
+        //   sebiID : user?.sebi || "",
+        //   gmeet: meetLink || ""
+        // })
+
+        // console.log("Session scheduled:", sessionScheduled)
+
+        // console.log("User email ID:", user!.email);
+        // axios.post('/api/send-email', {
+        //   to: user!.email,
+        //   subject: "New Session Scheduled Successfully",
+        //   text: `Your session "${session.title}" has been scheduled on ${session.date} at ${session.time}. Google Meet Link: ${meetLink || "Not Available"}`
+        // })
+
+        // console.log("Scheduled Meeting Response:", data.data)
+        console.log("\n\nUser id to be modified:\n\n", user?.$id || "");
+        await DBService.modifiedAt(user?.$id || "");
+        
+        setSessions(prev => [session, ...prev])
+        setNewSession({
         title: '',
         date: '',
         time: '',
@@ -190,6 +230,15 @@ export default function ExpertPanel() {
     }
   }
 
+  const handleConnect = async () => {
+     const res = await fetch("/api/google/check");
+        const data2 = await res.json();
+
+        if (!data2.exists) {
+          // No refresh token yet → redirect to Google OAuth
+          window.location.href = "/api/google/auth";
+        }
+  }
   // const cancelSession = async (sessionId: string) => {
   //   try {
   //     // Replace with actual API call
@@ -207,7 +256,7 @@ export default function ExpertPanel() {
     style: 'currency',
     currency: 'INR'
   }).format(amount);
-};
+  };
 
 
   const formatDate = (dateString: string) => {
@@ -241,6 +290,9 @@ export default function ExpertPanel() {
   const scheduledSessions = scheduledSession.filter(s => s.tag !== 'introductory')
 //   const completedSessions = sessions.filter(s => s.status === 'completed')
 
+if(screenLoading){
+    return <Skeleton />
+}
   return (
     <div className="min-h-screen bg-gray-50">
       <NavBar />
@@ -299,7 +351,13 @@ export default function ExpertPanel() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   {/* <Calendar className="h-5 w-5 text-blue-600" /> */}
-                  Schedule New Session
+                 
+                  <div>Schedule New Session</div>
+                  {
+                    connect ? <Button onClick={handleConnect}>Connect</Button> : 
+                    <Button className='bg-green-500'>Connected</Button>
+                  }
+                
                 </DialogTitle>
                 <DialogDescription>
                   Create a new session by filling in the details below.
@@ -401,11 +459,11 @@ export default function ExpertPanel() {
             </DialogContent>
           </Dialog>
 
-          <div className='bg-primary p-4 rounded-md'>
+          <div className='bg-white/20 backdrop-blur-2xl shadow-lg border border-black/50 p-4 rounded-md'>
             <div className='my-2'>
-            <p className='text-white/80 mb-2 text-sm'>Introductory Session</p>
-            <h3 className='text-white font-bold text-center'>{intro.title || "None"}</h3>
-            <p className='text-white/80 text-sm'>{intro.date || ""} {intro.date ? "at" : ""} {intro.time || ""}</p>
+            <p className='text-black/80 mb-2 text-sm'>Introductory Session</p>
+            <h3 className='text-black font-bold text-center'>{intro.title || "None"}</h3>
+            <p className='text-black/80 text-sm'>{intro.date || ""} {intro.date ? "at" : ""} {intro.time || ""}</p>
             </div>
             <div className='flex gap-2 justify-center'>
               <Button className='bg-red-500 hover:bg-red-600' onClick={async () => {
@@ -428,6 +486,7 @@ export default function ExpertPanel() {
                 sebi={user.sebi}
                 sebiId={user.sebi}
                 setIntro={setIntro}
+                expertId={user.$id}
               />
             </div>
             <div className='text-white/80 text-sm mt-2 text-center'>Registrations : {registeredUsers} </div>
@@ -697,7 +756,7 @@ function RegistrationDialog({ session, trigger }: RegistrationDialogProps) {
   )
 }
 
-function IntroductorySessionDialog({ sebi, sebiId , setIntro}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>}) {
+function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>, expertId?: string}) {
   // console.log("Sebi ID in IntroductorySessionDialog:", sebiId);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -730,6 +789,16 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro}: {sebi : string, s
       console.log("Introductory session created with ID:", data);
       await DBService.addIntroSession(sebiId, JSON.stringify({$id : data.$id, title, date, time }));
 
+      const meetingData = await axios.post('/api/schedule-meeting', { 
+        summary: `Introductory Session on: ${title} by Expert SEBI ID: ${sebi}`,
+        description: `Introductory session with expert SEBI ID: ${sebi}`,
+        startDateTime: new Date(date + "T" + time).toISOString(),
+        endDateTime: new Date(new Date(date + "T" + time).getTime() + 60 * 60000).toISOString(),
+        attendeesList: []
+      });
+
+      console.log("Scheduled Introductory Meeting Response:", meetingData.data);
+      await DBService.modifiedAt(expertId || "");
       toast.success("Introductory session created successfully");
       setIntro({ $id : data.$id, title, date, time });
       // Clear the form

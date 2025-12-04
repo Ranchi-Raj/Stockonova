@@ -33,7 +33,7 @@ import { Label } from "@/components/ui/label"
 import toast from "react-hot-toast"
 import { useAuth } from "@/hooks/useAuth"
 import { Tv, SquareDashedBottomCode, BookLock } from "lucide-react"
-
+import axios from "axios"
 // Expert Registration Dialog Component
 function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const [formData, setFormData] = useState({
@@ -104,6 +104,7 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
             Fill in your details to register as a SEBI expert. All fields are required.
           </DialogDescription>
         </DialogHeader>
+
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* SEBI ID */}
@@ -265,9 +266,35 @@ export default function HomePage() {
     return <SkeletonPage />
   }
 
+  const handleSendEmail = async () => {
+    // console.log("Sending test email...");
+
+    const res = await fetch("/api/google/check");
+      const data2 = await res.json();
+
+      if (!data2.exists) {
+        // No refresh token yet → redirect to Google OAuth
+        window.location.href = "/api/google/auth";
+      }
+
+    console.log("Google Auth initiated....");
+    const data = await axios.post('/api/schedule-meet', {
+      summary: "Test Meeting from Stockonova",
+      description: "This is a test meeting scheduled via Google Calendar API.",
+      startDateTime: new Date(new Date().getTime() + 5 * 60000).toISOString(), // 5 minutes from now
+      endDateTime: new Date(new Date().getTime() + 35 * 60000).toISOString(), // 30 minutes duration
+      attendeesList: []
+    });
+
+    console.log("Schedule Meet Response:", data.data);
+
+    toast.success("MEET link created and email sent!");
+  }
   return (
     <main>
       <NavBar />
+
+      <Button onClick={handleSendEmail}>Send MEET link</Button>
       
       {/* Expert Registration Dialog */}
       <ExpertRegistrationDialog 

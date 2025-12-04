@@ -102,6 +102,35 @@ export class AuthService{
 
         return null;
     }
+
+    async sendPasswordReset(email : string) {
+    try {
+        const res = await this.account.createRecovery({
+        email,
+        url : `${conf.appUrl}/reset-password`
+        // url: "https://stocknova.co.in/reset-password" // Your reset page
+        });
+
+        return res; 
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+    }
+    async resetPassword({ userId, secret, newPassword } : { userId: string, secret: string, newPassword: string }) {
+        try {
+            const res = await this.account.updateRecovery({
+            userId,
+            secret,
+            password: newPassword,
+            });
+
+            return res;
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+        }
 }
 const authService = new AuthService();
 

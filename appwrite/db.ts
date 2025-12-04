@@ -24,7 +24,7 @@ class DBService{
                 expert: false
 
             });
-            console.log(data);
+            // console.log(data);
             return data;
         }
         catch(err){
@@ -135,7 +135,7 @@ class DBService{
                     phone : phone
                 }
             );
-            console.log(data);
+            // console.log(data);
             return data;
         }
     catch(err){
@@ -154,7 +154,7 @@ class DBService{
                     // Query.equal('expert', true)
                 ]
             );            
-            console.log(resp.documents);
+            // console.log(resp.documents);
             return resp.documents;
         }
         catch(err){
@@ -183,7 +183,9 @@ class DBService{
         const resp = await this.databases.listDocuments(
             conf.appwriteDatabaseId,
             conf.appwriteUserId,
-            []
+            // [
+            //     Query.orderDesc('$updatedAt')
+            // ]
         );
         
         // Get all unique sebi IDs
@@ -205,12 +207,23 @@ class DBService{
                 sebiDocsMap.set(doc.$id, doc);
             });
         }
+
+        // console.log("SEBI Documents Map:", sebiDocsMap);
         
         // Merge users with their sebi documents
         const usersWithSebi = resp.documents.map(user => ({
             ...user,
-            sebi: user.sebi ? sebiDocsMap.get(user.sebi) || null : null
-        }));
+            sebi: user.sebi ? sebiDocsMap.get(user.sebi) || null : null,
+            // $updatedAt: new Date(sebiDocsMap.get(user.sebi)?.$updatedAt || user.$updatedAt).toISOString(),
+        })) 
+
+        // console.log("Users with SEBI details:", usersWithSebi);
+
+        usersWithSebi.sort((a, b) => {
+            const dateA = a.$updatedAt ? new Date(a.$updatedAt).getTime() : 0;
+            const dateB = b.$updatedAt ? new Date(b.$updatedAt).getTime() : 0;
+            return dateB - dateA; // Descending order
+        });
         
         return usersWithSebi;
     }
@@ -328,10 +341,10 @@ class DBService{
     }
 
     async scheduleSession({
-            title,date,time,duration,fee,expertId,sebiID, tag
+            title,date,time,duration,fee,expertId,sebiID, tag, gmeet
             }: {
             title: string,date: string,time: string,duration?: number,fee: number,expertId: string
-            ,sebiID: string, tag?: string
+            ,sebiID: string, tag?: string, gmeet?: string
         }) {
         try {
             // Create the new session
@@ -346,7 +359,8 @@ class DBService{
                 duration,
                 fee,
                 expertId,
-                tag
+                tag,
+                gmeet
             }
             );
             console.log("Sebi id at time of creating session", sebiID);
@@ -364,15 +378,23 @@ class DBService{
             console.log("Updated sessions array:", sebi.sessions);  
             // Update SEBI document
             await this.databases.updateDocument(
-            conf.appwriteDatabaseId,
-            conf.appwriteSebiId, // ← ensure this is the SEBI collection ID
-            sebiID,
+                conf.appwriteDatabaseId,
+                conf.appwriteSebiId, // ← ensure this is the SEBI collection ID
+                sebiID,
             {
                 sessions: sebi.sessions
             }
             );
 
-            
+            // await this.databases.updateDocument(
+            //     conf.appwriteDatabaseId,
+            //     conf.appwriteUserId,
+            //     expertId,
+            //     {
+            //         $updatedAt: new Date().toISOString()
+            //     }
+            // );
+
             return resp;
         } catch (err) {
             console.log(err);
@@ -724,6 +746,28 @@ class DBService{
                     max : max
                 }
             );
+            console.log(resp);
+            return resp;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async modifiedAt(expertId: string){
+        console.log("Updating modified at for expert:", expertId);
+        try{
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                expertId,
+                {
+                    dummy : Math.random() * 100000 // just to update the modified at field
+                }
+            );
+
+            // console.log("New Date:", new Date().toISOString());
             console.log(resp);
             return resp;
         }

@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Toaster } from "react-hot-toast"
 import { Suspense } from "react"
+// import Auth from '../auth'
 
 export const metadata: Metadata = {
   title: "Stocknova — Connect with SEBI-Registered Experts",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
     "Stocknova is a discovery and engagement platform connecting retail investors with SEBI-registered experts for investment learning and consultation.",
   generator: "v0.app",
 }
+
+  // Auth.main();
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,6 +31,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} antialiased`}>
       <body className="font-sans bg-background text-foreground">
         <Suspense fallback={<div>Loading...</div>}>
+          
           {children}
           <Toaster />
           <Analytics />

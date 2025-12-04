@@ -58,6 +58,8 @@ export default function ExpertsPage() {
         <div className="flex justify-between">
         <h1 className="text-2xl font-semibold">Experts</h1>
 
+    {
+      user && !user.expert &&
         <Dialog open={open} onOpenChange={dialogHandler}>
           <DialogTrigger asChild>
             <Button>Upcoming Booked Sessions</Button>
@@ -84,7 +86,7 @@ export default function ExpertsPage() {
             </DialogDescription>
           </DialogContent>
         </Dialog>
-
+    }
         </div>
       </section>
       <ExpertGridClient />

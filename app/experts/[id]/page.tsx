@@ -16,6 +16,7 @@ import { toast } from "react-hot-toast"
 import { useUserStore } from "@/store/counterStore"
 import { useAuth } from "@/hooks/useAuth"
 import { SessionInterface } from "@/interfaces/interface"
+import axios from "axios"
 
 interface Expert {
   $id: string
@@ -61,6 +62,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
   const user = useUserStore((state) => state.user)
   const [subscribed, setSubscribed] = useState<boolean>(false)
   const [sessions, setSessions] = useState<SessionInterface[]>([])
+
   useAuth();
 
   useEffect(() => {
@@ -170,6 +172,14 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       )
       // TODO : Send email to user with meeting link
 
+
+
+      await axios.post('/api/send-email', { 
+        to: user!.email, 
+        subject: "Introductory Session Booked Successfully", 
+        text: `Dear ${user!.name},\n\nYou have successfully booked an introductory session on "${expert.intro.title}" scheduled for ${format(new Date(expert.intro.date), "EEE, MMM d")} at ${expert.intro.time} Hours.\n\nThank you for choosing our platform!\n\nBest regards,\nStockonova Team` 
+      });
+
       // On success:
       setSubscribed(true)
       toast.success("Intro session booked successfully!")
@@ -181,7 +191,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
     }
   }
 
-  const bookOneOnOne = async (sessionId: string, userId: string) => {
+  const bookOneOnOne = async (sessionId: string, userId: string, time : string, date : string, title : string, gmeet : string | undefined) => {
     try {
       // Call your booking API or function here
       const resp = await DBService.addUserToSession({
@@ -204,7 +214,18 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       // Add the session to user's registered sessions
 
       await DBService.addRegisteredSessionToUser(user!.$id, sessionId)
+
+      await axios.post('/api/add-to-meet',{
+        eventId : gmeet,
+        email : user?.email
+      })
       // TODO : Send email to user with meeting link
+      await axios.post('/api/send-email', { 
+        to: user!.email, 
+        subject: "1:1 Session Booked Successfully", 
+        text: `Dear ${user!.name},\n\nYou have successfully booked a 1:1 personalized session scheduled on ${date} at ${time} Hours for the topic "${title}". We look forward to your participation. \n\nThank you for choosing our platform!\n\nBest regards,\nStockonova Team` 
+      });
+
       toast.success("1:1 session booked successfully!")
     }
     catch( error) {
@@ -314,7 +335,9 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         {sessions && sessions.length > 0 ? (
           sessions.map((slot, index) => {
             const d = new Date(slot.date);
-            if(slot.tag == 'oneToOne')
+            const userRegistered = slot.users.length === 0 || slot.users.includes(user!.$id);
+
+            if(slot.tag == 'oneToOne' && userRegistered)
           {
             return (
               <BookingModal
@@ -352,7 +375,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                           <i className="bi bi-clock text-muted-foreground"></i>
                           <span className="text-muted-foreground">Time:</span>
                           <span className="font-medium">
-                            {format(d, "h:mm a")}
+                            {slot.time}
                           </span>
                         </div>
 
@@ -385,7 +408,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                   </Button>
                 }
                 onConfirmText="Book Slot"
-                bookIntro={() => bookOneOnOne(slot.$id,user!.$id)}
+                bookIntro={() => bookOneOnOne(slot.$id,user!.$id,slot.time,slot.date, slot.title, slot?.gmeet)}
               />
             );
           }
