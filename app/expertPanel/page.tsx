@@ -340,6 +340,10 @@ if(screenLoading){
             <h2 className="text-2xl font-semibold text-gray-900">Session Management</h2>
             <p className="text-gray-600 mt-1">Manage your scheduled sessions and earnings</p>
           </div>
+              {
+                connect ? <Button onClick={handleConnect}>Connect</Button> : 
+                <Button className='bg-green-500 hover:bg-green-500'>Connected</Button>
+              }
           <Dialog open={showNewSessionForm} onOpenChange={setShowNewSessionForm}>
             <DialogTrigger asChild>
               <Button className=" text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
@@ -353,10 +357,6 @@ if(screenLoading){
                   {/* <Calendar className="h-5 w-5 text-blue-600" /> */}
                  
                   <div>Schedule New Session</div>
-                  {
-                    connect ? <Button onClick={handleConnect}>Connect</Button> : 
-                    <Button className='bg-green-500'>Connected</Button>
-                  }
                 
                 </DialogTitle>
                 <DialogDescription>
