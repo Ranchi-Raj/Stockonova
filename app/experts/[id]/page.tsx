@@ -34,6 +34,7 @@ interface Expert {
   expertiseAreas?: string[]
   oneOnOneSlots?: string[]
   intro : {$id : string, title : string, date : string, time : string}
+  gmeet? : string | undefined
 }
 interface Sebi{
   $id: string
@@ -80,7 +81,24 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           setSubscribed(true)
         }
         console.log(expertData)
-        console.log(params.id)
+        const sebi = await DBService.getSebiById(expertData.sebi.$id) as{
+          intro : string
+        }
+        
+        const introData = JSON.parse(sebi.intro);
+
+        // console.log("Intro Data:", introData);
+        const session = await DBService.getSessionById(introData.$id) as {
+          gmeet : string | undefined
+        }
+
+        console.log("Session Data:", session);
+        setExpert((prev) => ({
+          ...prev,
+          gmeet : session.gmeet
+        } as Expert))
+        
+        // console.log(params.id)
         if (!expertData || !expertData.expert) {
           notFound()
         }
@@ -89,7 +107,6 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           intro : string
         }
         
-
         // Transform the data to match expected format
         const transformedExpert: Expert = {
           $id: expertData.$id,
@@ -103,6 +120,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           experience: expertData.sebi.experience,
           bio: expertData.sebi.bio,
           intro : JSON.parse(intro.intro),
+          gmeet : session.gmeet
           // photoUrl: expertData.sebi.photoUrl,
           // intros: expertData.intros || [],
           // expertiseAreas: expertData.expertiseAreas || [expertData.specialization],
@@ -151,12 +169,14 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       //   intros : user?.intros || []
       // })
 
+      await axios.post('/api/add-to-meet',{
+        eventId : expert.gmeet,
+        email : user?.email
+      })
+
+
       console.log("Session to be booked:", expert.intro.$id, "for user", user!.$id)
 
-      // await DBService.addUserToSession({
-      //   sessionId: expert.intro.$id,
-      //   userId: user!.$id
-      // })
       console.log("Expert intro id:", expert.$id, "User id:", user!.$id)
       await DBService.addIntroUserToSave(expert.sebi, user!.$id)
       await DBService.addUserToSession({
@@ -171,8 +191,6 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         }
       )
       // TODO : Send email to user with meeting link
-
-
 
       await axios.post('/api/send-email', { 
         to: user!.email, 
@@ -298,7 +316,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                 amount={199}
                 title="Book Introductory Session"
                 bookIntro={bookIntro}
-                description="Confirm your ₹199 intro session. You will receive an email with the meeting link."
+                description={`Confirm your ₹199 intro session. You will receive an email with the meeting link.` }
                 trigger={<Button className="w-full rounded-2xl">Book Introductory Session</Button>}
                 />
               </div>

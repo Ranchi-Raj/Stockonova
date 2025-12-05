@@ -489,7 +489,7 @@ if(screenLoading){
                 expertId={user.$id}
               />
             </div>
-            <div className='text-white/80 text-sm mt-2 text-center'>Registrations : {registeredUsers} </div>
+            <div className='text-black/80 text-sm mt-2 text-center'>Registrations : {registeredUsers} </div>
           </div>
         </div>
 
@@ -774,6 +774,13 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId}: {sebi :
         toast.error("SEBI ID is missing");
         return;
       }
+      const meetingData = await axios.post('/api/schedule-meet', { 
+        summary: `Introductory Session on: ${title} by Expert SEBI ID: ${sebi}`,
+        description: `Introductory session with expert SEBI ID: ${sebi}`,
+        startDateTime: new Date(date + "T" + time).toISOString(),
+        endDateTime: new Date(new Date(date + "T" + time).getTime() + 60 * 60000).toISOString(),
+        attendeesList: []
+      });
       // Call the DBService to create the introductory session
       const data = await DBService.scheduleSession({
         title,
@@ -783,19 +790,13 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId}: {sebi :
         fee: 199,
         expertId: sebi,
         sebiID: sebiId,
-        tag : "introductory"
+        tag : "introductory",
+        gmeet : meetingData.data.eventId || ""
       }) as { $id: string };
 
       console.log("Introductory session created with ID:", data);
       await DBService.addIntroSession(sebiId, JSON.stringify({$id : data.$id, title, date, time }));
 
-      const meetingData = await axios.post('/api/schedule-meeting', { 
-        summary: `Introductory Session on: ${title} by Expert SEBI ID: ${sebi}`,
-        description: `Introductory session with expert SEBI ID: ${sebi}`,
-        startDateTime: new Date(date + "T" + time).toISOString(),
-        endDateTime: new Date(new Date(date + "T" + time).getTime() + 60 * 60000).toISOString(),
-        attendeesList: []
-      });
 
       console.log("Scheduled Introductory Meeting Response:", meetingData.data);
       await DBService.modifiedAt(expertId || "");
