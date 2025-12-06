@@ -44,7 +44,7 @@ export default function SignUp() {
     e.preventDefault();
 
     try{
-      await Auth.signOut();
+      await Auth.logout(); // Logout any existing session
       // Handle form submission logic here
       if(details.password !== details.confirmPassword){
         toast.error("Passwords do not match");
