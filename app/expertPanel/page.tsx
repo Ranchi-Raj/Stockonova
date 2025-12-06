@@ -62,6 +62,8 @@ export default function ExpertPanel() {
   
   // Fetch sessions on component mount
   useEffect(() => {
+
+    console.log("Expert Panel mounted for user:", user)
     fetchSessions()
     if(user?.refreshToken){
       setConnected(true)
@@ -345,14 +347,16 @@ if(screenLoading){
           </div>
         </div>
       </div>
-
+    {
+      !user.refreshToken &&
       <div className='flex mx-auto gap-4 justify-center'>
         <div className='flex flex-row gap-2'>
         <Label>Add Refresh Token</Label>
-        <Input className='w-1/2' onChange={(e) => setRefreshToken(e.target.value)}></Input>
+        <Input className='w-1/2' value={refreshToken} onChange={(e) => setRefreshToken(e.target.value)}></Input>
         </div>
         <Button onClick={updateRefreshToken}>Submit</Button>
       </div>
+      }
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Action Bar */}
