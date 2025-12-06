@@ -49,7 +49,7 @@ export default function SignUp() {
       const account = await Auth.getUser();
       
       console.log("Existing account:", account);
-      if(!account)
+      if(account)
         await Auth.logout(); // Logout any existing session
           
       // Handle form submission logic here
