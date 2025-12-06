@@ -180,35 +180,35 @@ export default function ExpertPanel() {
 
       // Create an event in Google Calendar and Gmeet session
 
-        // const data = await axios.post('/api/schedule-meet', { 
-        //   summary: ` Session on: ${session.title} by Expert: ${user!.name}`,
-        //   description: `Session with expert ${user!.name}`,
-        //   startDateTime: new Date(session.date + "T" + session.time).toISOString(),
-        //   endDateTime: new Date(new Date(session.date + "T" + session.time).getTime() + session.duration * 60000).toISOString(),
-        //   attendeesList: []
-        // })
-        // const meetLink = data.data.eventId;
+        const data = await axios.post('/api/schedule-meet', { 
+          summary: ` Session on: ${session.title} by Expert: ${user!.name}`,
+          description: `Session with expert ${user!.name}`,
+          startDateTime: new Date(session.date + "T" + session.time).toISOString(),
+          endDateTime: new Date(new Date(session.date + "T" + session.time).getTime() + session.duration * 60000).toISOString(),
+          attendeesList: []
+        })
+        const meetLink = data.data.eventId;
         
-        // console.log("Data from scheduling meet:", data.data);
-        // const sessionScheduled = await DBService.scheduleSession({
-        //   title : newSession.title,
-        //   date : newSession.date,
-        //   time : newSession.time,
-        //   duration : newSession.duration,
-        //   fee : newSession.fee,
-        //   expertId : user?.$id || "",
-        //   sebiID : user?.sebi || "",
-        //   gmeet: meetLink || ""
-        // })
+        console.log("Data from scheduling meet:", data.data);
+        const sessionScheduled = await DBService.scheduleSession({
+          title : newSession.title,
+          date : newSession.date,
+          time : newSession.time,
+          duration : newSession.duration,
+          fee : newSession.fee,
+          expertId : user?.$id || "",
+          sebiID : user?.sebi || "",
+          gmeet: meetLink || ""
+        })
 
-        // console.log("Session scheduled:", sessionScheduled)
+        console.log("Session scheduled:", sessionScheduled)
 
-        // console.log("User email ID:", user!.email);
-        // axios.post('/api/send-email', {
-        //   to: user!.email,
-        //   subject: "New Session Scheduled Successfully",
-        //   text: `Your session "${session.title}" has been scheduled on ${session.date} at ${session.time}. Google Meet Link: ${meetLink || "Not Available"}`
-        // })
+        console.log("User email ID:", user!.email);
+        axios.post('/api/send-email', {
+          to: user!.email,
+          subject: "New Session Scheduled Successfully",
+          text: `Your session "${session.title}" has been scheduled on ${session.date} at ${session.time}. Google Meet Link: ${meetLink || "Not Available"}`
+        })
 
         // console.log("Scheduled Meeting Response:", data.data)
         console.log("\n\nUser id to be modified:\n\n", user?.$id || "");
@@ -234,6 +234,8 @@ export default function ExpertPanel() {
   }
 
   const handleConnect = async () => {
+
+    // await DBService.updateRefreshToken("");
      const res = await fetch(`/api/google/check?user=${encodeURIComponent(JSON.stringify(user))}`);
         const data2 = await res.json();
 

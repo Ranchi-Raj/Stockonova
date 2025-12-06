@@ -1,6 +1,7 @@
 import conf from '../conf/conf'
 import { Client, Databases, Account, ID, Query } from 'appwrite';
 import { SessionInterface } from '../interfaces/interface'
+import Auth from './auth';
 
 class DBService{
     client = new Client();
@@ -10,6 +11,7 @@ class DBService{
         this.client
             .setEndpoint(conf.appwriteUrl)
             .setProject(conf.appwriteProjectId)
+            // .setDevKey("standard_1077c8e82772b3b2df7cce4443b045f0aa3d12fdeae175926f5ae956363b71370bb93af77578b96543bfbcc30bb2d27dce9039a0c36034a9801d90056281ca1bfe79b9ed7865428e99bec9595ce028b80d508bcc32d7c2c1a3ec9ed44f3b285517d77bdf9aaa0fe5798a6a066e62f126aef4399e168aa205bd6b9e35581af009");
         this.databases = new Databases(this.client);
         this.account = new Account(this.client);
     }
@@ -777,8 +779,19 @@ class DBService{
         }
     }
 
-    async updateRefreshToken(userId: string, refreshToken: string){
+    async updateRefreshToken(refreshToken: string){
         try{
+
+            const account = await Auth.getUser();
+            if(!account){
+                throw new Error("No user logged in");
+            }
+
+            console.log("The User at the time of refresh token update",account)
+            const user = await this.getUserByEmail(account.email) as { $id: string };
+
+            const userId = user.$id;
+            
             const resp = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteUserId,
@@ -787,6 +800,8 @@ class DBService{
                     refreshToken : refreshToken
                 }
             );
+
+            console.log("Refresh token updated for user:", userId, "and email", account.email);
             console.log(resp);
             return resp;
         }

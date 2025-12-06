@@ -3,14 +3,12 @@ import { NextResponse } from "next/server";
 // import fs from "fs";
 import conf from "@/conf/conf";
 import DBService from "@/appwrite/db";
-import { useUserStore } from "@/store/counterStore";
+// import axios from "axios";
 export async function GET(req: Request) {
 
   console.log("Google callback invoked");
   
   const url = new URL(req.url);
-  const user = useUserStore.getState().user;
-  const setUser = useUserStore.getState().setUser;
   const code = url.searchParams.get("code");
 
   if (!code) {
@@ -33,23 +31,19 @@ export async function GET(req: Request) {
   //   );
   // }
 
-  console.log("Refresh token updated in database for user:", user);
   // Update user's refresh token in the database
-  if (user && tokens.refresh_token) {
-    await DBService.updateRefreshToken(user.$id, tokens.refresh_token);
-    setUser({
-      ...user,
-      refreshToken: tokens.refresh_token,
+  if (tokens.refresh_token) {
+    // await axios.post('/api/refreshToken',{
+    //   refreshToken : tokens.refresh_token
+    // })
+    await DBService.updateRefreshToken(tokens.refresh_token);
+    console.log("Google account connected successfully!");
+    return NextResponse.json({
+      message: "Google account connected successfully!",
+      refreshTokenSaved: Boolean(tokens.refresh_token),
+        
     });
   }
-
-  // return NextResponse.json({
-  //   message: "Google account connected successfully!",
-  //   refreshTokenSaved: Boolean(tokens.refresh_token),
-      
-  // });
-  
-  console.log("Google account connected successfully!");
 
   return NextResponse.redirect(conf.appUrl + "/expertPanel");
 }

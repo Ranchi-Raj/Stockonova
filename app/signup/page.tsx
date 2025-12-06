@@ -10,6 +10,7 @@ import Auth from "@/appwrite/auth"
 import toast from "react-hot-toast"
 import { useRouter } from "next/navigation"
 import { useSignInStore } from "@/store/counterStore"
+import { useAuth } from "@/hooks/useAuth"
 interface SignUpDetails {
   firstName: string
   lastName: string
@@ -20,6 +21,7 @@ interface SignUpDetails {
   // sebiRegNumber?: string
 }
 export default function SignUp() {
+  useAuth();
 
   const [details, setDetails] = useState<SignUpDetails>({
     firstName: "",
@@ -44,7 +46,7 @@ export default function SignUp() {
     e.preventDefault();
 
     try{
-      await Auth.logout(); // Logout any existing session
+      // await Auth.logout(); // Logout any existing session
       // Handle form submission logic here
       if(details.password !== details.confirmPassword){
         toast.error("Passwords do not match");

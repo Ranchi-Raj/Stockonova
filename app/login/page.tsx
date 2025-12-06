@@ -12,10 +12,12 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignInStore } from "@/store/counterStore"
 import HomePageSkeleton from "../components/skeleton"
+import { useAuth } from "@/hooks/useAuth"
 // import AuthService  from "@/appwrite/auth"
 // import DBService from "@/appwrite/db"
 
   export default function LoginPage() {
+    useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
@@ -61,16 +63,25 @@ import HomePageSkeleton from "../components/skeleton"
       }
       catch(err){
         console.log("Login error", err);
-        toast.error("Unable to login. Please try again.");
+        await Auth.logout(); // Logout any existing session
+        toast.error("Please try again.");
       }
       
     }
 
     const signUpWithGoogle = async () => {
       // Handle Google sign-up logic here
-      console.log("Sign up with Google clicked");
-       Auth.signInWithGoogle();
-      // setSignIn();
+      try{
+
+        console.log("Sign up with Google clicked");
+        Auth.signInWithGoogle();
+        // setSignIn();
+      }
+      catch(err){
+        console.log("Error in Google Sign In", err);
+        toast.error("Error in Google Sign In, please try again.");
+        await Auth.logout(); // Logout any existing session
+      }
      
 
       }
