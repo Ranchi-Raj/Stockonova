@@ -182,8 +182,9 @@ export default function ExpertPanel() {
       console.log("Google Auth initiated....");
 
       // Create an event in Google Calendar and Gmeet session
+      console.log("Scheduling Google Meet for session:", user?.refreshToken);
 
-        const data = await axios.post('/api/schedule-meet', { 
+        const data = await axios.post(`/api/schedule-meet?token=${encodeURIComponent(user?.refreshToken || "")}`, { 
           summary: ` Session on: ${session.title} by Expert: ${user!.name}`,
           description: `Session with expert ${user!.name}`,
           startDateTime: new Date(session.date + "T" + session.time).toISOString(),
@@ -512,6 +513,7 @@ if(screenLoading){
                 sebiId={user.sebi}
                 setIntro={setIntro}
                 expertId={user.$id}
+                token ={user.refreshToken || ""}
               />
             </div>
             <div className='text-black/80 text-sm mt-2 text-center'>Registrations : {registeredUsers} </div>
@@ -781,7 +783,7 @@ function RegistrationDialog({ session, trigger }: RegistrationDialogProps) {
   )
 }
 
-function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>, expertId?: string}) {
+function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>, expertId?: string,token : string}) {
   // console.log("Sebi ID in IntroductorySessionDialog:", sebiId);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -799,7 +801,7 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId}: {sebi :
         toast.error("SEBI ID is missing");
         return;
       }
-      const meetingData = await axios.post('/api/schedule-meet', { 
+      const meetingData = await axios.post('/api/schedule-meet?token=' + encodeURIComponent(token), { 
         summary: `Introductory Session on: ${title} by Expert SEBI ID: ${sebi}`,
         description: `Introductory session with expert SEBI ID: ${sebi}`,
         startDateTime: new Date(date + "T" + time).toISOString(),

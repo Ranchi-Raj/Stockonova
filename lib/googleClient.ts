@@ -1,15 +1,9 @@
 import { google } from "googleapis";
-import fs from "fs";
 import conf from "@/conf/conf";
+export function getGoogleAuth(token ?: string | undefined) {
+  const refreshToken = token;
 
-export function getGoogleAuth() {
-  let refreshToken = null;
-
-  if (fs.existsSync("google-refresh.json")) {
-    refreshToken = JSON.parse(
-      fs.readFileSync("google-refresh.json", "utf8")
-    ).refresh_token;
-  }
+  console.log("Using refresh token from store at the Google Client:", refreshToken);
 
   if (!refreshToken) {
     throw new Error(

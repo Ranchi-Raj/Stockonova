@@ -6,9 +6,11 @@ import { getGoogleAuth } from "@/lib/googleClient";
 export async function POST(req: Request) {
   try {
     const { summary, description, startDateTime, endDateTime, attendeesList } =
-      await req.json();
-
-    const auth = getGoogleAuth();
+    await req.json();
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get("token");
+    console.log("Scheduling meet with token:", decodeURIComponent(token!)); // decodeURIComponent(token);
+    const auth = getGoogleAuth(decodeURIComponent(token!));
     const calendar = google.calendar({ version: "v3", auth });
 
     const event = {
