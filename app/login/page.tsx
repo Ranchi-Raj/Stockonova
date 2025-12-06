@@ -12,12 +12,10 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignInStore } from "@/store/counterStore"
 import HomePageSkeleton from "../components/skeleton"
-import { useAuth } from "@/hooks/useAuth"
-// import AuthService  from "@/appwrite/auth"
-// import DBService from "@/appwrite/db"
+
 
   export default function LoginPage() {
-    useAuth();
+    // useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
