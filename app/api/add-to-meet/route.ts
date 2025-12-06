@@ -10,7 +10,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing eventId or email" }, { status: 400 });
     }
 
-    const auth = getGoogleAuth();
+    const token = new URL(req.url).searchParams.get("token");
+
+    const auth = getGoogleAuth(decodeURIComponent(token!));
     const calendar = google.calendar({ version: "v3", auth });
 
     const updatedEvent = await calendar.events.patch({

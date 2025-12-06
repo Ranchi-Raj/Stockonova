@@ -34,7 +34,8 @@ interface Expert {
   expertiseAreas?: string[]
   oneOnOneSlots?: string[]
   intro : {$id : string, title : string, date : string, time : string}
-  gmeet? : string | undefined
+  gmeet? : string | undefined,
+  refreshToken? : string
 }
 interface Sebi{
   $id: string
@@ -53,6 +54,7 @@ interface User{
   phone: string
   sebi : Sebi
   expert: boolean
+  refreshToken? : string
 }
 
 export default function ExpertProfile({ params }: { params: { id: string } }) {
@@ -71,6 +73,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       try {
         // Fetch expert data
         const expertData = await DBService.getUserbyId(params.id) as User
+        console.log("Fetched expert data:", expertData);
         const sessions = await DBService.getSessionsBySebiId(expertData.sebi.$id) as SessionInterface[]
         const modifiedSessions = sessions.map((session) => ({
           ...session,
@@ -95,7 +98,8 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         console.log("Session Data:", session);
         setExpert((prev) => ({
           ...prev,
-          gmeet : session.gmeet
+          gmeet : session.gmeet,
+          refreshToken : expertData.refreshToken
         } as Expert))
         
         // console.log(params.id)
@@ -120,7 +124,8 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           experience: expertData.sebi.experience,
           bio: expertData.sebi.bio,
           intro : JSON.parse(intro.intro),
-          gmeet : session.gmeet
+          gmeet : session.gmeet,
+          refreshToken : expertData.refreshToken
           // photoUrl: expertData.sebi.photoUrl,
           // intros: expertData.intros || [],
           // expertiseAreas: expertData.expertiseAreas || [expertData.specialization],
@@ -169,7 +174,9 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       //   intros : user?.intros || []
       // })
 
-      await axios.post('/api/add-to-meet',{
+      console.log("Booking intro session for user:", expert.refreshToken)
+
+      await axios.post(`/api/add-to-meet?token=${encodeURIComponent(expert.refreshToken || "")}`,{
         eventId : expert.gmeet,
         email : user?.email
       })
@@ -233,7 +240,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
 
       await DBService.addRegisteredSessionToUser(user!.$id, sessionId)
 
-      await axios.post('/api/add-to-meet',{
+      await axios.post(`/api/add-to-meet?token=${encodeURIComponent(expert?.refreshToken || "")}`,{
         eventId : gmeet,
         email : user?.email
       })
@@ -255,6 +262,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
   return (
     <main>
       <NavBar />
+      {/* <Button onClick={bookIntro}>Book</Button> */}
       <section className="mx-auto max-w-7xl px-4 py-8">
         {/* Header */}
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
