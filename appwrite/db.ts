@@ -779,18 +779,8 @@ class DBService{
         }
     }
 
-    async updateRefreshToken(refreshToken: string){
+    async updateRefreshToken(userId : string,refreshToken: string){
         try{
-
-            const account = await Auth.getUser();
-            if(!account){
-                throw new Error("No user logged in");
-            }
-
-            console.log("The User at the time of refresh token update",account)
-            const user = await this.getUserByEmail(account.email) as { $id: string };
-
-            const userId = user.$id;
             
             const resp = await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
@@ -801,7 +791,7 @@ class DBService{
                 }
             );
 
-            console.log("Refresh token updated for user:", userId, "and email", account.email);
+            console.log("Refresh token updated for user:", userId);
             console.log(resp);
             return resp;
         }

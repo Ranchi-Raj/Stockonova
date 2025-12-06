@@ -49,7 +49,9 @@ export default function SignUp() {
       const account = await Auth.getUser();
       
       console.log("Existing account:", account);
-      // await Auth.logout(); // Logout any existing session
+      if(!account)
+        await Auth.logout(); // Logout any existing session
+          
       // Handle form submission logic here
       if(details.password !== details.confirmPassword){
         toast.error("Passwords do not match");

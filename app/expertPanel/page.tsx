@@ -56,6 +56,7 @@ export default function ExpertPanel() {
   const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [registeredUsers, setRegisteredUsers] = useState<number>(-1)
   const [connected, setConnected] = useState(false)
+  const [refreshToken, setRefreshToken] = useState("")
   // Call useAuth hook for authentication
   // console.log("User in ExpertPanel:", user)
   
@@ -241,7 +242,7 @@ export default function ExpertPanel() {
 
         if (!data2.exists) {
           // No refresh token yet → redirect to Google OAuth
-          window.location.href = "/api/google/auth";
+          window.location.href = "/api/google/auth?user=" + encodeURIComponent(JSON.stringify(user));
         }
   }
   // const cancelSession = async (sessionId: string) => {
@@ -271,6 +272,13 @@ export default function ExpertPanel() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const updateRefreshToken = async () => {
+    await DBService.updateRefreshToken(user?.$id || "",refreshToken)
+    setRefreshToken("")
+    toast.success("Refresh token updated successfully")
+    console.log("Refresh token updated in database.");
   }
 
   // If user is not an expert, redirect to home
@@ -336,6 +344,14 @@ if(screenLoading){
             </div>
           </div>
         </div>
+      </div>
+
+      <div className='flex mx-auto gap-4 justify-center'>
+        <div className='flex flex-row gap-2'>
+        <Label>Add Refresh Token</Label>
+        <Input className='w-1/2' onChange={(e) => setRefreshToken(e.target.value)}></Input>
+        </div>
+        <Button onClick={updateRefreshToken}>Submit</Button>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

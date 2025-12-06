@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation"
 import { useSignInStore } from "@/store/counterStore"
 import HomePageSkeleton from "../components/skeleton"
 
-
   export default function LoginPage() {
     // useAuth();
     const [email, setEmail] = useState("");
@@ -38,11 +37,11 @@ import HomePageSkeleton from "../components/skeleton"
         finally{
           setLoading(false);
         }
-        
       }
 
       checkUser();
     },[])
+    
     const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       // Handle login logic here

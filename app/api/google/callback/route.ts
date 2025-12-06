@@ -11,6 +11,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
 
+  // const userParam = url.searchParams.get("user");
+  // const user = userParam ? JSON.parse(decodeURIComponent(userParam)) : null;
+  // console.log("User parameter:", user);
+
   if (!code) {
     return NextResponse.json({ error: "Missing authorization code" });
   }
@@ -36,12 +40,12 @@ export async function GET(req: Request) {
     // await axios.post('/api/refreshToken',{
     //   refreshToken : tokens.refresh_token
     // })
-    await DBService.updateRefreshToken(tokens.refresh_token);
+    // await DBService.updateRefreshToken(tokens.refresh_token); 
     console.log("Google account connected successfully!");
     return NextResponse.json({
       message: "Google account connected successfully!",
       refreshTokenSaved: Boolean(tokens.refresh_token),
-        
+      refreshToken: tokens.refresh_token
     });
   }
 
