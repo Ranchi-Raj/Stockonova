@@ -10,6 +10,7 @@ interface User {
   expert : boolean;
   sebi : string;
   earning: number;
+  refreshToken?: string;
   // Add other user properties if needed
 }
 
@@ -29,7 +30,8 @@ const defaultUser: User = {
   intros: ["empty"],
   expert: false,
   sebi : "",
-  earning: 0
+  earning: 0,
+  refreshToken: undefined,
 };
 
 // -------------------- User Store --------------------

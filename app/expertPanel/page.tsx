@@ -55,13 +55,16 @@ export default function ExpertPanel() {
   })
   const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [registeredUsers, setRegisteredUsers] = useState<number>(-1)
-  const [connect, setConnect] = useState(false)
+  const [connected, setConnected] = useState(false)
   // Call useAuth hook for authentication
   // console.log("User in ExpertPanel:", user)
   
   // Fetch sessions on component mount
   useEffect(() => {
     fetchSessions()
+    if(user?.refreshToken){
+      setConnected(true)
+    }
     // Set up interval to check for expired sessions
     const interval = setInterval(checkExpiredSessions, 60000) // Check every minute
     return () => clearInterval(interval)
@@ -73,7 +76,7 @@ export default function ExpertPanel() {
       setScreenLoading(true)
       // Replace with actual API call
       console.log("User", user)
-      console.log("Fetching sessions for SEBI ID:", user?.sebi)
+      // console.log("Fetching sessions for SEBI ID:", user?.sebi)
       const sessions = await DBService.getSessionsBySebiId(user?.sebi || "")
       const passed = await DBService.getPastSessionsBySebiId(user?.sebi || "")
       const fees = await DBService.getSebiById(user?.sebi || "") as {
@@ -83,7 +86,7 @@ export default function ExpertPanel() {
       console.log("Min fee:", fees.min, "Max fee:", fees.max);
       setMinFee(fees.min);
       setMaxFee(fees.max);
-      console.log("Fetched sessions:", sessions)
+      // console.log("Fetched sessions:", sessions)
       const mockSessions: Session[] = [
       ]
       const res = await DBService.getSebiById(user?.sebi || "") as {
@@ -165,7 +168,7 @@ export default function ExpertPanel() {
         users : []
       }
 
-        const res = await fetch("/api/google/check");
+        const res = await fetch(`/api/google/check?user=${encodeURIComponent(JSON.stringify(user))}`);
         const data2 = await res.json();
 
         if (!data2.exists) {
@@ -231,7 +234,7 @@ export default function ExpertPanel() {
   }
 
   const handleConnect = async () => {
-     const res = await fetch("/api/google/check");
+     const res = await fetch(`/api/google/check?user=${encodeURIComponent(JSON.stringify(user))}`);
         const data2 = await res.json();
 
         if (!data2.exists) {
@@ -341,7 +344,7 @@ if(screenLoading){
             <p className="text-gray-600 mt-1">Manage your scheduled sessions and earnings</p>
           </div>
               {
-                connect ? <Button onClick={handleConnect}>Connect</Button> : 
+                !connected ? <Button onClick={handleConnect}>Connect</Button> : 
                 <Button className='bg-green-500 hover:bg-green-500'>Connected</Button>
               }
           <Dialog open={showNewSessionForm} onOpenChange={setShowNewSessionForm}>

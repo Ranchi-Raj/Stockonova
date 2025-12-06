@@ -14,6 +14,7 @@ interface User {
   expert : boolean;
   sebi : string;
   earning: number;
+  refreshToken?: string;
   // Add other user properties if needed
 }
 // Custom hook to check authentication status and redirect if not authenticated
@@ -41,7 +42,8 @@ export function useAuth(redirectUrl = "/login") {
             intros: userData.intros || [],
             expert: userData.expert,
             sebi : userData.sebi,
-            earning : sebiData?.earnings || 0
+            earning : sebiData?.earnings || 0,
+            refreshToken: userData.refreshToken
           } as User);
 
           console.log("Auth checked and User is logged in", user);

@@ -453,7 +453,7 @@ class DBService{
             await Promise.all(
                 data.sessions.map(sessionId => this.getSessionById(sessionId) as Promise<SessionInterface>)
             ).then(sessions => {
-                console.log("Sessions obtained",sessions);
+                // console.log("Sessions obtained",sessions);
                 sessionsList.push(...sessions);
             });
             // Ensure there is at least one document and it has a sessions property
@@ -479,7 +479,7 @@ class DBService{
             await Promise.all(
                 data.pastSessions.map(sessionId => this.getSessionById(sessionId) as Promise<SessionInterface>)
             ).then(sessions => {
-                console.log("Sessions obtained",sessions);
+                // console.log("Sessions obtained",sessions);
                 sessionsList.push(...sessions);
             });
             // Ensure there is at least one document and it has a sessions property
@@ -498,7 +498,7 @@ class DBService{
                 conf.appwriteSessionsId,
                 sessionID
             );
-            console.log(data);
+            // console.log(data);
             return data;
         }
         catch(err){
@@ -555,7 +555,7 @@ class DBService{
                 );
             }
 
-            console.log("Session deleted from both:");
+            // console.log("Session deleted from both:");
             return resp;
         }
         catch(err){
@@ -768,6 +768,25 @@ class DBService{
             );
 
             // console.log("New Date:", new Date().toISOString());
+            console.log(resp);
+            return resp;
+        }
+        catch(err){
+            console.log(err);
+            return err;
+        }
+    }
+
+    async updateRefreshToken(userId: string, refreshToken: string){
+        try{
+            const resp = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                userId,
+                {
+                    refreshToken : refreshToken
+                }
+            );
             console.log(resp);
             return resp;
         }
