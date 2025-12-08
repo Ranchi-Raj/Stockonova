@@ -248,7 +248,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
       await axios.post('/api/send-email', { 
         to: user!.email, 
         subject: "1:1 Session Booked Successfully", 
-        text: `Dear ${user!.name},\n\nYou have successfully booked a 1:1 personalized session scheduled on ${date} at ${time} Hours for the topic "${title}". We look forward to your participation. \n\nThank you for choosing our platform!\n\nBest regards,\nStockonova Team` 
+        text: `Dear ${user!.name},\n\nYou have successfully booked a 1:1 personalized session scheduled on ${date.split("T")[0]} at ${time} Hours for the topic "${title}". We look forward to your participation. \n\nThank you for choosing our platform!\n\nBest regards,\nStockonova Team` 
       });
 
       toast.success("1:1 session booked successfully!")
