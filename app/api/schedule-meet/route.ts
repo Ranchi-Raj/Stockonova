@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { summary, description, startDateTime, endDateTime, attendeesList } =
     await req.json();
     const { searchParams } = new URL(req.url);
-    const token = searchParams.get("tokens");
+    const token = searchParams.get("token");
     console.log("Scheduling meet with token:", decodeURIComponent(token!)); // decodeURIComponent(token);
     const auth = getGoogleAuth(decodeURIComponent(token!));
     const calendar = google.calendar({ version: "v3", auth });
