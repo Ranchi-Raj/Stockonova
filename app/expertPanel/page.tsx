@@ -278,10 +278,19 @@ export default function ExpertPanel() {
   }
 
   const updateRefreshToken = async () => {
-    await DBService.updateRefreshToken(user?.$id || "",refreshToken)
-    setRefreshToken("")
-    toast.success("Refresh token updated successfully")
-    console.log("Refresh token updated in database.");
+    try{
+      if(!user?.$id)
+        throw new Error("User ID is missing")
+
+      await DBService.updateRefreshToken(user?.$id,refreshToken)
+      setRefreshToken("")
+      toast.success("Refresh token updated successfully")
+      console.log("Refresh token updated in database.");
+    }
+    catch(e){
+      toast.error("Failed to update refresh token")
+      console.log("Error updating refresh token:", e);
+    }
   }
 
   // If user is not an expert, redirect to home
