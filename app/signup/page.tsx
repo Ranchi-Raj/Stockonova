@@ -1,28 +1,26 @@
-"use client"
-import React, { useState } from "react"
-import { NavBar } from "@/app/components/navbar"
-import { Footer } from "@/app/components/footer"
-import Image from "next/image"
-import Link from "next/link"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import Auth from "@/appwrite/auth"
-import toast from "react-hot-toast"
-import { useRouter } from "next/navigation"
-import { useSignInStore } from "@/store/counterStore"
+"use client";
+import React, { useState } from "react";
+import { NavBar } from "@/app/components/navbar";
+import { Footer } from "@/app/components/footer";
+import Image from "next/image";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import Auth from "@/appwrite/auth";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { useSignInStore } from "@/store/counterStore";
 
 interface SignUpDetails {
-  firstName: string
-  lastName: string
-  email: string
-  password: string
-  confirmPassword: string
-  phoneNumber: string
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
   // sebiRegNumber?: string
 }
 export default function SignUp() {
-  
-
   const [details, setDetails] = useState<SignUpDetails>({
     firstName: "",
     lastName: "",
@@ -40,20 +38,19 @@ export default function SignUp() {
     console.log("Sign up with Google clicked");
     Auth.signInWithGoogle();
     setSignIn();
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try{
+    try {
       const account = await Auth.getUser();
-      
+
       console.log("Existing account:", account);
-      if(account)
-        await Auth.logout(); // Logout any existing session
-          
+      if (account) await Auth.logout(); // Logout any existing session
+
       // Handle form submission logic here
-      if(details.password !== details.confirmPassword){
+      if (details.password !== details.confirmPassword) {
         toast.error("Passwords do not match");
         return;
       }
@@ -64,17 +61,16 @@ export default function SignUp() {
         name: details.firstName + " " + details.lastName,
         phone: details.phoneNumber,
       });
-      
+
       console.log(data);
       setSignIn();
       toast.success("Account created successfully");
       router.replace("/dashboard");
-    }catch(err){
+    } catch (err) {
       console.log(err);
       toast.error("Error creating account");
     }
-
-  }
+  };
   return (
     <main>
       <NavBar />
@@ -89,23 +85,87 @@ export default function SignUp() {
                 height={320}
                 className="h-auto w-full rounded-xl"
               />
-              <h2 className="mt-4 text-lg font-semibold">Join Stocknova Experts</h2>
-              <p className="text-sm text-muted-foreground">Become a trusted, verified SEBI expert.</p>
+              <h2 className="mt-4 text-lg font-semibold">
+                Join Stocknova Experts
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Register as a trusted, verified SEBI expert.
+              </p>
             </div>
           </div>
           <div>
             <h1 className="text-xl font-semibold text-center">Sign Up</h1>
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
-                <Input className="rounded-2xl" placeholder="First Name" type="text" value={details.firstName} onChange={(e) => setDetails({ ...details, firstName: e.target.value })} />
-                <Input className="rounded-2xl" placeholder="Last Name" type="text" value={details.lastName} onChange={(e) => setDetails({ ...details, lastName: e.target.value })} />
+                <Input
+                  className="rounded-2xl"
+                  placeholder="First Name"
+                  type="text"
+                  value={details.firstName}
+                  onChange={(e) =>
+                    setDetails({ ...details, firstName: e.target.value })
+                  }
+                />
+                <Input
+                  className="rounded-2xl"
+                  placeholder="Last Name"
+                  type="text"
+                  value={details.lastName}
+                  onChange={(e) =>
+                    setDetails({ ...details, lastName: e.target.value })
+                  }
+                />
               </div>
-              <Input className="rounded-2xl" placeholder="Email" type="email" value={details.email} onChange={(e) => setDetails({ ...details, email: e.target.value })} />
-              <Input required className={`rounded-2xl ${(details.phoneNumber.length === 10 || details.phoneNumber.length === 0) ? "border-green-500" : "border-red-500"}`} placeholder="Phone Number" type="tel" value={details.phoneNumber} onChange={(e) => setDetails({ ...details, phoneNumber: e.target.value })} />
-              <Input className="rounded-2xl" placeholder="Password" type="password" value={details.password} onChange={(e) => setDetails({ ...details, password: e.target.value })} />
-              <Input className={`rounded-2xl border-2 ${details.confirmPassword === details.password ? "border-green-500" : "border-red-500"}`} placeholder="Confirm Password" type="password" value={details.confirmPassword} onChange={(e) => setDetails({ ...details, confirmPassword: e.target.value })} />
+              <Input
+                className="rounded-2xl"
+                placeholder="Email"
+                type="email"
+                value={details.email}
+                onChange={(e) =>
+                  setDetails({ ...details, email: e.target.value })
+                }
+              />
+              <Input
+                required
+                className={`rounded-2xl ${
+                  details.phoneNumber.length === 10 ||
+                  details.phoneNumber.length === 0
+                    ? "border-green-500"
+                    : "border-red-500"
+                }`}
+                placeholder="Phone Number"
+                type="tel"
+                value={details.phoneNumber}
+                onChange={(e) =>
+                  setDetails({ ...details, phoneNumber: e.target.value })
+                }
+              />
+              <Input
+                className="rounded-2xl"
+                placeholder="Password"
+                type="password"
+                value={details.password}
+                onChange={(e) =>
+                  setDetails({ ...details, password: e.target.value })
+                }
+              />
+              <Input
+                className={`rounded-2xl border-2 ${
+                  details.confirmPassword === details.password
+                    ? "border-green-500"
+                    : "border-red-500"
+                }`}
+                placeholder="Confirm Password"
+                type="password"
+                value={details.confirmPassword}
+                onChange={(e) =>
+                  setDetails({ ...details, confirmPassword: e.target.value })
+                }
+              />
               {/* <Input className="rounded-2xl" placeholder="SEBI Registration Number" type="text" /> */}
-              <Button className="w-full rounded-2xl" type="submit">Create Account</Button>
+              <Button className="w-full rounded-2xl" type="submit">
+                Create Account
+              </Button>
             </form>
 
             {/* OR Separator */}
@@ -116,7 +176,11 @@ export default function SignUp() {
             </div>
 
             {/* Sign up with Google */}
-            <Button variant="outline" className="w-full rounded-2xl" onClick={signUpWithGoogle}>
+            <Button
+              variant="outline"
+              className="w-full rounded-2xl"
+              onClick={signUpWithGoogle}
+            >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
@@ -139,7 +203,9 @@ export default function SignUp() {
             </Button>
 
             <div className="mt-4 text-center text-sm">
-              <span className="text-muted-foreground">Already have an account? </span>
+              <span className="text-muted-foreground">
+                Already have an account?{" "}
+              </span>
               <Link className="text-foreground hover:underline" href="/login">
                 Login
               </Link>
@@ -149,5 +215,5 @@ export default function SignUp() {
       </section>
       <Footer />
     </main>
-  )
+  );
 }

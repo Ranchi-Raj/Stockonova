@@ -1,48 +1,54 @@
-"use client"
+"use client";
 
-import { NavBar } from "@/app/components/navbar"
-import { Footer } from "@/app/components/footer"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { NavBar } from "@/app/components/navbar";
+import { Footer } from "@/app/components/footer";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 // import { ExpertGridClient } from "@/app/components/expert-grid-client"
-import Image from "next/image"
-import Auth from "@/appwrite/auth"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useUserStore } from "@/store/counterStore"
-import SkeletonPage from "@/app/components/skeleton"
-import { useSignInStore } from "@/store/counterStore"
-import DBService from "@/appwrite/db"
+import Image from "next/image";
+import Auth from "@/appwrite/auth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useUserStore } from "@/store/counterStore";
+import SkeletonPage from "@/app/components/skeleton";
+import { useSignInStore } from "@/store/counterStore";
+import DBService from "@/appwrite/db";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import toast from "react-hot-toast"
-import { useAuth } from "@/hooks/useAuth"
-import { Tv, SquareDashedBottomCode, BookLock } from "lucide-react"
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import toast from "react-hot-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { Tv, SquareDashedBottomCode, BookLock } from "lucide-react";
 // import axios from "axios"
 // Expert Registration Dialog Component
-function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+function ExpertRegistrationDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [formData, setFormData] = useState({
     sebiId: "",
     bio: "",
     experience: "",
     phone: "",
     specialization: "",
-  })
+  });
 
   const specializations = [
     { value: "A", label: "Equity Research" },
@@ -52,15 +58,17 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
     { value: "E", label: "Financial Planning" },
     { value: "F", label: "Risk Management" },
     { value: "G", label: "Compliance & Regulations" },
-  ]
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Handle form submission here
-    console.log("Expert registration data:", formData)
-    const account = await DBService.getUserByEmail(useUserStore.getState().user?.email || "");
-    if(!account){
+    console.log("Expert registration data:", formData);
+    const account = await DBService.getUserByEmail(
+      useUserStore.getState().user?.email || ""
+    );
+    if (!account) {
       toast.error("User not found. Please try again.");
       return;
     }
@@ -71,13 +79,13 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
       experience: parseInt(formData.experience, 10),
       specialization: formData.specialization,
       bio: formData.bio,
-      userId : (account as { $id?: string }).$id || "" ,
-      phone : formData.phone
-    })
+      userId: (account as { $id?: string }).$id || "",
+      phone: formData.phone,
+    });
 
-    console.log("Request submitted:", data)
-    toast.success("Request submitted successfully")
-    onOpenChange(false)
+    console.log("Request submitted:", data);
+    toast.success("Request submitted successfully");
+    onOpenChange(false);
     // Reset form
     setFormData({
       sebiId: "",
@@ -85,27 +93,27 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
       experience: "",
       specialization: "",
       phone: "",
-    })
-  }
+    });
+  };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
-    }))
-  }
+      [field]: value,
+    }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Become a SEBI Registered Expert</DialogTitle>
+          <DialogTitle>Register as a SEBI Registered Expert</DialogTitle>
           <DialogDescription>
-            Fill in your details to register as a SEBI expert. All fields are required.
+            Fill in your details to register as a SEBI expert. All fields are
+            required.
           </DialogDescription>
         </DialogHeader>
 
-        
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* SEBI ID */}
           <div className="space-y-2">
@@ -149,7 +157,9 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
             <Label htmlFor="specialization">Specialization</Label>
             <Select
               value={formData.specialization}
-              onValueChange={(value) => handleInputChange("specialization", value)}
+              onValueChange={(value) =>
+                handleInputChange("specialization", value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select your specialization" />
@@ -186,20 +196,18 @@ function ExpertRegistrationDialog({ open, onOpenChange }: { open: boolean; onOpe
             >
               Cancel
             </Button>
-            <Button type="submit">
-              Register as Expert
-            </Button>
+            <Button type="submit">Register as Expert</Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 // Main HomePage Component
 export default function HomePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState<boolean>(true);
   const setSignIn = useSignInStore((state) => state.signIn);
   const setSignOut = useSignInStore((state) => state.signOut);
   const [expert, setExpert] = useState<boolean>(false);
@@ -209,11 +217,10 @@ export default function HomePage() {
   useAuth();
 
   const redirectToExpertPanel = () => {
-    router.push("/expertPanel")
-  }
+    router.push("/expertPanel");
+  };
 
   useEffect(() => {
-
     const opens = async () => {
       try {
         const user = await Auth.getUser();
@@ -257,13 +264,13 @@ export default function HomePage() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     opens();
-  }, [])
+  }, []);
 
   if (loading) {
-    return <SkeletonPage />
+    return <SkeletonPage />;
   }
 
   // const handleSendEmail = async () => {
@@ -295,9 +302,9 @@ export default function HomePage() {
       <NavBar />
 
       {/* <Button onClick={handleSendEmail}>Send MEET link</Button> */}
-      
+
       {/* Expert Registration Dialog */}
-      <ExpertRegistrationDialog 
+      <ExpertRegistrationDialog
         open={showExpertDialog}
         onOpenChange={setShowExpertDialog}
       />
@@ -309,11 +316,11 @@ export default function HomePage() {
             Go to Expert Dashboard
           </Button>
         ) : (
-          <Button 
+          <Button
             className="rounded-2xl"
             onClick={() => setShowExpertDialog(true)}
           >
-            Become an SEBI Expert
+            Register as a SEBI Expert
           </Button>
         )}
       </div>
@@ -326,7 +333,8 @@ export default function HomePage() {
                 Connect with SEBI-Registered Experts. Learn. Consult. Grow.
               </h1>
               <p className="mt-4 text-pretty text-sm text-muted-foreground md:text-base">
-                Attend verified sessions and gain personalized investment guidance.
+                Attend verified sessions and gain personalized investment
+                guidance.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/experts">
@@ -364,24 +372,31 @@ export default function HomePage() {
         <h2 className="text-xl font-semibold">How It Works</h2>
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           <div className="rounded-2xl border bg-card p-6 shadow-md">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center"><BookLock className="h-6 w-6"/></div>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center">
+              <BookLock className="h-6 w-6" />
+            </div>
             <h3 className="mt-3 font-medium">Book Introductory Session</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Pick a verified expert and reserve an affordable intro session.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-6 shadow-md">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center"><Tv className="h-6 w-6"/></div>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center">
+              <Tv className="h-6 w-6" />
+            </div>
             <h3 className="mt-3 font-medium">Attend Live Session</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Join the live session to validate fit and learn the approach.
             </p>
           </div>
           <div className="rounded-2xl border bg-card p-6 shadow-md">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center"><SquareDashedBottomCode className="h-7 w-7"/></div>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex justify-center items-center">
+              <SquareDashedBottomCode className="h-7 w-7" />
+            </div>
             <h3 className="mt-3 font-medium">Unlock 1:1 Consultation</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              After the intro, access premium 1:1 calendar slots for deeper guidance.
+              After the intro, access premium 1:1 calendar slots for deeper
+              guidance.
             </p>
           </div>
         </div>
@@ -389,5 +404,5 @@ export default function HomePage() {
 
       <Footer />
     </main>
-  )
+  );
 }
