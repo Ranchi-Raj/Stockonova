@@ -286,6 +286,8 @@ export default function ExpertPanel() {
       setRefreshToken("")
       toast.success("Refresh token updated successfully")
       console.log("Refresh token updated in database.");
+
+      setConnected(true);
     }
     catch(e){
       toast.error("Failed to update refresh token")
@@ -358,7 +360,7 @@ if(screenLoading){
         </div>
       </div>
     {
-      !user.refreshToken &&
+      !connected &&
       <div className='flex mx-auto gap-4 justify-center'>
         <div className='flex flex-row gap-2'>
         <Label>Add Refresh Token</Label>
