@@ -25,6 +25,7 @@ export default function ExpertPanel() {
   useAuth();
 
   const user = useUserStore((state) => state.user)
+  const setRefreshTokeninZustand = useUserStore((state) => state.setUser)
   const router = useRouter()
   const [sessions, setSessions] = useState<Session[]>([])
   const [showNewSessionForm, setShowNewSessionForm] = useState(false)
@@ -234,10 +235,10 @@ export default function ExpertPanel() {
       toast.error('Failed to schedule session')
     } finally {
       setLoading(false)
-    }
+    } 
   }
 
-  const handleConnect = async () => {
+  const handleConnect = async (): Promise<void> => {
 
     // await DBService.updateRefreshToken("");
      const res = await fetch(`/api/google/check?user=${encodeURIComponent(JSON.stringify(user))}`);
@@ -283,6 +284,7 @@ export default function ExpertPanel() {
         throw new Error("User ID is missing")
 
       await DBService.updateRefreshToken(user?.$id,refreshToken)
+      setRefreshTokeninZustand({...user, refreshToken : refreshToken})
       setRefreshToken("")
       toast.success("Refresh token updated successfully")
       console.log("Refresh token updated in database.");
@@ -803,6 +805,8 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {
 
   const addIntroductorySession = async () => {
     try {
+
+      console.log("Adding introductory session with data:", { title, date, time, sebi, sebiId });
       // Validate inputs
       if (!title || !date || !time) {
         toast.error("Please fill in all fields");

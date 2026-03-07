@@ -1,8 +1,6 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
-// import fs from "fs";
 import conf from "@/conf/conf";
-import DBService from "@/appwrite/db";
 // import axios from "axios";
 export async function GET(req: Request) {
 
