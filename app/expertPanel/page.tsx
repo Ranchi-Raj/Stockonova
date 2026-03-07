@@ -25,7 +25,7 @@ export default function ExpertPanel() {
   useAuth();
 
   const user = useUserStore((state) => state.user)
-  const setRefreshTokeninZustand = useUserStore((state) => state.setUser)
+  const setRefreshTokeninZustand = useUserStore.getState().setUser;
   const router = useRouter()
   const [sessions, setSessions] = useState<Session[]>([])
   const [showNewSessionForm, setShowNewSessionForm] = useState(false)
@@ -285,6 +285,7 @@ export default function ExpertPanel() {
 
       await DBService.updateRefreshToken(user?.$id,refreshToken)
       setRefreshTokeninZustand({...user, refreshToken : refreshToken})
+      // user.refreshToken = refreshToken;
       setRefreshToken("")
       toast.success("Refresh token updated successfully")
       console.log("Refresh token updated in database.");
@@ -814,6 +815,10 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {
       }
       if (!sebiId) {
         toast.error("SEBI ID is missing");
+        return;
+      }
+      if(!token){
+        toast.loading("Please refresh");
         return;
       }
       const meetingData = await axios.post('/api/schedule-meet?token=' + encodeURIComponent(token), { 
