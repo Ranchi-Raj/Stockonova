@@ -284,10 +284,11 @@ export default function ExpertPanel() {
         throw new Error("User ID is missing")
 
       await DBService.updateRefreshToken(user?.$id,refreshToken)
-      setRefreshTokeninZustand({...user, refreshToken : refreshToken})
+      useUserStore.getState().setUser({...user, refreshToken});
+
       // user.refreshToken = refreshToken;
       setRefreshToken("")
-      toast.success("Refresh token updated successfully")
+      toast.loading("Refresh token updated. Please refresh the page.")
       console.log("Refresh token updated in database.");
 
       setConnected(true);
