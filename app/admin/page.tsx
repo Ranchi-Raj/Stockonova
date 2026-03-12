@@ -19,7 +19,7 @@ import { SessionInterface } from "@/interfaces/interface"
 import CheckUserModal from "../components/checkUserModal"
 import { Badge } from "@/components/ui/badge"
 import SetThreshold from "../components/setThreshold"
-
+import  {AdminNavBar } from "../components/admin-navbar"
 interface Request {
     id: string
     name: string
@@ -84,6 +84,11 @@ export default function AdminPage() {
         setLoginError("")
 
         if (username === "admin" && password === "admin") {
+            localStorage.setItem("adminAuth", JSON.stringify({
+                status : true,
+            }))
+            setUsername("")
+            setPassword("")
             setIsAuthenticated(true)
         } else {
             setLoginError("Invalid credentials. Use admin/admin")
@@ -96,6 +101,18 @@ export default function AdminPage() {
         const scheduled = data.filter(session => session.status === 'scheduled');
         setLiveSessions(scheduled);
     }
+
+    useEffect(() =>{
+        // Check if admin is already authenticated (e.g., via localStorage)
+        
+        const adminAuth = localStorage.getItem("adminAuth");
+        if (adminAuth && JSON.parse(adminAuth).status === true) {
+            setIsAuthenticated(true);
+        } 
+        else{
+            setIsAuthenticated(false);
+        }
+    },[isAuthenticated])
 
     useEffect(() => {
         if (!isAuthenticated) return
@@ -249,7 +266,8 @@ export default function AdminPage() {
     // Show admin dashboard if authenticated
    return (
     <main>
-        <NavBar />
+        {/* <NavBar /> */}
+        <AdminNavBar setIsAuthenticated={setIsAuthenticated}/>  
 
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center justify-between mb-6">

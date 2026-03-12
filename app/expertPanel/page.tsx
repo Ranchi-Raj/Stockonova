@@ -19,8 +19,7 @@ import { SessionInterface as Session } from '@/interfaces/interface'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import axios from 'axios'
 import Skeleton  from '@/app/components/skeleton'
-// import { checkFile } from '@/lib/checkFile'
-
+import Image from 'next/image'
 export default function ExpertPanel() {
   useAuth();
 
@@ -58,6 +57,11 @@ export default function ExpertPanel() {
   const [registeredUsers, setRegisteredUsers] = useState<number>(-1)
   const [connected, setConnected] = useState(false)
   const [refreshToken, setRefreshToken] = useState("")
+  const [photoDialogOpen, setPhotoDialogOpen] = useState(false);
+  //Cloudinary image
+  const [file,setFile] = useState<File | null>(null);
+  const [photoUpload,setPhotoUpload] = useState(false);
+
   // Call useAuth hook for authentication
   // console.log("User in ExpertPanel:", user)
   
@@ -73,6 +77,36 @@ export default function ExpertPanel() {
     const interval = setInterval(checkExpiredSessions, 60000) // Check every minute
     return () => clearInterval(interval)
   }, [user])
+
+  const handleUpdate = async () => {
+      try{
+          setPhotoUpload(true)
+          const formData = new FormData();
+          if(!file){
+            toast.error("Please select a file first");
+            return;
+          }
+        formData.append("file",file)
+        const photo = await axios.post("/api/uploadImage", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+      });
+        const res = await DBService.updatePhotoOfExpert({id: user!.$id, photo: photo.data.image});
+
+        console.log("Photo updated successfully:", res);
+      
+      setPhotoDialogOpen(false);
+      toast.success("Photo updated successfully");
+      setPhotoUpload(false);
+      }
+      catch(e){
+        console.log("Error at Cloudinary photo addition",e)
+        toast.error("Failed to update photo");
+      }
+      finally{
+      }
+  }
   
   const fetchSessions = async () => {
     try {
@@ -153,7 +187,6 @@ export default function ExpertPanel() {
   }
 
   const handleCreateSession = async (e: React.FormEvent) => {
-
     e.preventDefault()
     if(newSession.fee < minFee || newSession.fee > maxFee){
       toast.error(`Fee must be between ${minFee} and ${maxFee}`);
@@ -187,12 +220,15 @@ export default function ExpertPanel() {
 
         const data = await axios.post(`/api/schedule-meet?token=${encodeURIComponent(user?.refreshToken || "")}`, { 
           summary: ` Session on: ${session.title} by Expert: ${user!.name}`,
-          description: `Session with expert ${user!.name}`,
+          description: `Session with expert ${user!.name} on ${session.title}`,
           startDateTime: new Date(session.date + "T" + session.time).toISOString(),
           endDateTime: new Date(new Date(session.date + "T" + session.time).getTime() + session.duration * 60000).toISOString(),
           attendeesList: []
         })
-        const meetLink = data.data.eventId;
+
+        console.log("Data after the meeting is scheduled",data)
+
+        const meetLink = data.data.googleMeetLink;
         
         console.log("Data from scheduling meet:", data.data);
         const sessionScheduled = await DBService.scheduleSession({
@@ -288,7 +324,7 @@ export default function ExpertPanel() {
 
       // user.refreshToken = refreshToken;
       setRefreshToken("")
-      toast.loading("Refresh token updated. Please refresh the page.")
+      toast.success("Updated. Please refresh the page.")
       console.log("Refresh token updated in database.");
 
       setConnected(true);
@@ -336,7 +372,51 @@ if(screenLoading){
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-white" />
+                   <Dialog open={photoDialogOpen} onOpenChange={setPhotoDialogOpen}>
+                    <DialogTrigger asChild>
+                      <div className="cursor-pointer">
+                        {/* <Image alt="profile" src={user?.image ? user?.image : "./pic"} width={32} height={32} className="h-6 w-6 text-white" /> */}
+                        {
+                          user?.image ?
+                          <Image alt="profile" src={user?.image ? user?.image : "/pic.png"} width={48} height={48} className="h-13 w-14 text-white rounded-full" /> :
+                          <User className="h-6 w-6 text-white" />
+                        }
+                      </div>
+                    </DialogTrigger>
+
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Update Profile Photo</DialogTitle>
+                      </DialogHeader>
+
+                      <div className="flex flex-col items-center gap-4">
+
+                        {/* Current / Preview Image */}
+                        <div className="relative h-32 w-32 rounded-full overflow-hidden border">
+                          <Image
+                            src={file ? URL.createObjectURL(file) : "/default-profile.png"}
+                            alt="Profile"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+
+                        {/* Pick Photo */}
+                        <Input
+                          type="file"
+                          accept="image/*"
+                           onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                          className="text-sm"
+                        />
+
+                        {/* Update Button */}
+                        <Button onClick={handleUpdate} disabled={!file || photoUpload}>
+                          {!photoUpload ? "Update Photo" : "Updating..."}
+                        </Button>
+
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">{user?.name}</h1>
@@ -529,6 +609,7 @@ if(screenLoading){
                 setIntro={setIntro}
                 expertId={user.$id}
                 token ={user.refreshToken || ""}
+                username={user.name}
               />
             </div>
             <div className='text-black/80 text-sm mt-2 text-center'>Registrations : {registeredUsers} </div>
@@ -798,7 +879,7 @@ function RegistrationDialog({ session, trigger }: RegistrationDialogProps) {
   )
 }
 
-function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>, expertId?: string,token : string}) {
+function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token,username}: {sebi : string, sebiId?: string , setIntro: React.Dispatch<React.SetStateAction<{$id : string, title : string, time : string, date : string}>>, expertId?: string,token : string,username : string}) {
   // console.log("Sebi ID in IntroductorySessionDialog:", sebiId);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
@@ -823,8 +904,8 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {
         return;
       }
       const meetingData = await axios.post('/api/schedule-meet?token=' + encodeURIComponent(token), { 
-        summary: `Introductory Session on: ${title} by Expert SEBI ID: ${sebi}`,
-        description: `Introductory session with expert SEBI ID: ${sebi}`,
+        summary: `Introductory Session on: ${title} by Expert ${username}`,
+        description: `Introductory session on ${title}`,
         startDateTime: new Date(date + "T" + time).toISOString(),
         endDateTime: new Date(new Date(date + "T" + time).getTime() + 60 * 60000).toISOString(),
         attendeesList: []
@@ -841,6 +922,8 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {
         tag : "introductory",
         gmeet : meetingData.data.eventId || ""
       }) as { $id: string };
+
+      // TODO : ADD the route to send the confirmation email to the expert
 
       console.log("Introductory session created with ID:", data);
       await DBService.addIntroSession(sebiId, JSON.stringify({$id : data.$id, title, date, time }));
@@ -867,7 +950,7 @@ function IntroductorySessionDialog({ sebi, sebiId , setIntro, expertId,token}: {
       <DialogTrigger asChild>
         <Button className='bg-green-500 hover:bg-green-600'>
                 New
-              </Button>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>

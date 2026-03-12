@@ -42,16 +42,16 @@ const AboutPage = () => {
                             <p className="text-lg">For any queries, suggestions, or support, please reach out to us:</p>
                             <div className="space-y-3 text-lg">
                                 <div className="flex items-center gap-3">
-                                    <span className="font-semibold min-w-24">Instagram:</span>
-                                    <span className="text-blue-600">stocknova2025</span>
+                                    <span className="font-semibold min-w-24">LinkedIn:</span>
+                                    <a href="https://www.linkedin.com/company/stocknova/" target="_blank" className="text-blue-600">https://www.linkedin.com/company/stocknova/</a>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <span className="font-semibold min-w-24">LinkedIn:</span>
-                                    <span className="text-blue-600">Stocknova</span>
+                                    <span className="font-semibold min-w-24">Instagram:</span>
+                                    <a href="https://www.instagram.com/stocknova2025?igsh=MWluMDBuNWFscHh0bQ==" target="_blank" className="text-blue-600">https://www.instagram.com/stocknova2025?igsh=MWluMDBuNWFscHh0bQ==</a>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <span className="font-semibold min-w-24">Website:</span>
-                                    <a href="https://www.stocknova.co.in" className="text-blue-600 hover:underline">
+                                    <a href="https://www.stocknova.co.in" target="_blank" className="text-blue-600 hover:underline">
                                         www.stocknova.co.in
                                     </a>
                                 </div>
@@ -101,7 +101,7 @@ const AboutPage = () => {
                         <div className="space-y-3 text-amber-800 text-lg leading-relaxed">
                             <p><strong>Stocknova is not a SEBI-registered advisor and does not provide investment advice.</strong></p>
                             <p>The views and opinions shared by SEBI-registered experts are their own.</p>
-                            <p>Stocknova&nbsp;s role is limited to connecting users with verified SEBI-registered professionals, and it shall not be held responsible for any advice or actions taken based on such sessions.</p>
+                            <p>Stocknova&apos;s role is limited to connecting users with verified SEBI-registered professionals, and it shall not be held responsible for any advice or actions taken based on such sessions.</p>
                         </div>
                     </div>
                 </section>

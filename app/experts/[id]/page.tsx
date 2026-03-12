@@ -55,6 +55,7 @@ interface User {
   sebi: Sebi;
   expert: boolean;
   refreshToken?: string;
+  image?: string;
 }
 
 export default function ExpertProfile({ params }: { params: { id: string } }) {
@@ -65,7 +66,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
   const user = useUserStore((state) => state.user);
   const [subscribed, setSubscribed] = useState<boolean>(false);
   const [sessions, setSessions] = useState<SessionInterface[]>([]);
-
+  const [beingDisplayed,setBeingDisplayed] = useState<boolean>(false);
   useAuth();
 
   useEffect(() => {
@@ -131,7 +132,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           intro: JSON.parse(intro.intro),
           gmeet: session.gmeet,
           refreshToken: expertData.refreshToken,
-          // photoUrl: expertData.sebi.photoUrl,
+          photoUrl: expertData.image || "/pic.png",
           // intros: expertData.intros || [],
           // expertiseAreas: expertData.expertiseAreas || [expertData.specialization],
           // oneOnOneSlots: expertData.oneOnOneSlots || []
@@ -172,12 +173,6 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
   const bookIntro = async () => {
     try {
       // Call your booking API or function here
-      // await DBService.addIntroInUser({
-      //   id : user!.$id,
-      //   expertId : expert.$id,
-      //   // sebiId : expert.sebi.$id,
-      //   intros : user?.intros || []
-      // })
 
       console.log("Booking intro session for user:", expert.refreshToken);
 
@@ -430,6 +425,8 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                       return null;
                     }
 
+                    setBeingDisplayed(true);
+
                     return (
                       <BookingModal
                         key={index}
@@ -521,6 +518,14 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                     No available slots at the moment.
                   </p>
                 )}
+
+                {
+                  !beingDisplayed && (
+                    <p className="text-sm text-muted-foreground col-span-full text-center py-8 border rounded-xl bg-muted/20">
+                      No available slots at the moment.
+                    </p>
+                  )
+                }
               </div>
             )}
           </Card>

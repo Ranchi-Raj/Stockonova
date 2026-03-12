@@ -35,6 +35,25 @@ class DBService{
             }
     }
 
+    async updatePhotoOfExpert({id, photo} : {id: string, photo: string}){
+        try{
+            const data = await this.databases.updateDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteUserId,
+                id,
+                {
+                    image : photo
+                }
+            )
+
+            return data;
+        }
+        catch(e){
+            console.log("Error at updating photo of expert", e);
+            return e;
+        }
+    }
+
     async getUserByEmail(email: string){
         try{
             const resp = await this.databases.listDocuments(
