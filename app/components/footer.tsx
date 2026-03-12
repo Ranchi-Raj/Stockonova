@@ -12,40 +12,45 @@ export function Footer() {
             </p>
           </div>
           <div>
-  <h3 className="text-sm font-semibold">Company</h3>
-  <ul className="mt-2 space-y-2 text-sm">
-    <li>
-      <Link className="text-muted-foreground hover:text-foreground" href="/about#about">
-        About
-      </Link>
-    </li>
-    <li>
-      <Link className="text-muted-foreground hover:text-foreground" href="/about#contact">
-        Contact
-      </Link>
-    </li>
-  </ul>
+          <h3 className="text-sm font-semibold">Company</h3>
+          <ul className="mt-2 space-y-2 text-sm">
+            <li>
+              <Link className="text-muted-foreground hover:text-foreground" href="/about#about">
+                About
+              </Link>
+            </li>
+            <li>
+              <a className="text-muted-foreground hover:text-foreground" href="https://www.instagram.com/stocknova2025?igsh=MWluMDBuNWFscHh0bQ==" target="_blank">
+                Instagram
+              </a>
+            </li>
+             <li>
+              <a className="text-muted-foreground hover:text-foreground" href="https://www.linkedin.com/company/stocknova/" target="_blank">
+                LinkedIn
+              </a>
+            </li>
+          </ul>
           </div>  
           <div>
-  <h3 className="text-sm font-semibold">Legal</h3>
-  <ul className="mt-2 space-y-2 text-sm">
-    <li>
-      <Link className="text-muted-foreground hover:text-foreground" href="/about#terms">
-        Terms
-      </Link>
-    </li>
-    <li>
-      <Link className="text-muted-foreground hover:text-foreground" href="/about#privacy">
-        Privacy
-      </Link>
-    </li>
-    <li>
-      <Link className="text-muted-foreground hover:text-foreground" href="/about#disclaimer">
-        Disclaimer
-      </Link>
-    </li>
-  </ul>
-</div>
+      <h3 className="text-sm font-semibold">Legal</h3>
+      <ul className="mt-2 space-y-2 text-sm">
+        <li>
+          <Link className="text-muted-foreground hover:text-foreground" href="/about#terms">
+            Terms
+          </Link>
+        </li>
+        <li>
+          <Link className="text-muted-foreground hover:text-foreground" href="/about#privacy">
+            Privacy
+          </Link>
+        </li>
+        <li>
+          <Link className="text-muted-foreground hover:text-foreground" href="/about#disclaimer">
+            Disclaimer
+          </Link>
+        </li>
+      </ul>
+    </div>
           <div>
             <h3 className="text-sm font-semibold">Get Started</h3>
             <ul className="mt-2 space-y-2 text-sm">

@@ -12,6 +12,7 @@ interface User {
   earning: number;
   refreshToken?: string;
   // Add other user properties if needed
+  image?: string; // Optional profile image URL
 }
 
 // interface Sebi {
@@ -32,6 +33,7 @@ const defaultUser: User = {
   sebi : "",
   earning: 0,
   refreshToken: undefined,
+  image: "",
 };
 
 // -------------------- User Store --------------------

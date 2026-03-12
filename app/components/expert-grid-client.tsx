@@ -46,6 +46,7 @@ interface User {
   phone: string
   sebi?: Sebi // Made optional with ?
   expert: boolean
+  image : string
 }
 
 function matchesExperience(expYears: number, expFilter: string) {
@@ -164,6 +165,7 @@ export function ExpertGridClient() {
             sebiId: user.sebi?.sebiId || "N/A", // Safe access with optional chaining
             specialization: user.sebi?.specialization || "General",
             experience: user.sebi?.experience || 0,
+            photoUrl: user.image || "/pic.png",
           }));
         setExperts(expertUsers);
       } catch (error) {

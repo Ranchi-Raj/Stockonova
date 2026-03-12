@@ -10,6 +10,7 @@ import Auth from "@/appwrite/auth"
 import { useUserStore } from "@/store/counterStore"
 import { toast } from "react-hot-toast"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 const links = [
   { href: "/", label: "Home" },
@@ -60,7 +61,14 @@ export function NavBar() {
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-xl bg-primary"></div>
+          <div className="relative rounded-full h-14 w-14 p-0 m-0">
+            <Image
+              src="/logo_stocknova.png"
+              alt="Logo"
+              fill
+              className="object-cover rounded-xl"
+            />
+          </div>
           <span className="text-pretty text-xl font-semibold tracking-tight">Stocknova</span>
         </Link>
         
