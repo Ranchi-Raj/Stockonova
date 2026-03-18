@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { NavBar } from "@/app/components/navbar";
 import { Footer } from "@/app/components/footer";
 import { Card } from "@/components/ui/card";
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { BookingModal } from "@/app/components/booking-modal";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import DBService from "@/appwrite/db";
 import HomePageSkeleton from "@/app/components/skeleton";
 import { toast } from "react-hot-toast";
@@ -17,6 +15,8 @@ import { useUserStore } from "@/store/counterStore";
 import { useAuth } from "@/hooks/useAuth";
 import { SessionInterface } from "@/interfaces/interface";
 import axios from "axios";
+import { useParams } from "next/navigation";
+import Auth from "@/appwrite/auth";
 
 interface Expert {
   $id: string;
@@ -58,21 +58,33 @@ interface User {
   image?: string;
 }
 
-export default function ExpertProfile({ params }: { params: { id: string } }) {
-  // const params = use(param)
-  const router = useRouter();
+export default function ExpertProfile() {
+  useAuth();
+  const param = useParams() as { id: string };
+  
+  const params = param;
   const [expert, setExpert] = useState<Expert | null>(null);
   const [loading, setLoading] = useState(true);
   const user = useUserStore((state) => state.user);
   const [subscribed, setSubscribed] = useState<boolean>(false);
   const [sessions, setSessions] = useState<SessionInterface[]>([]);
-  const [beingDisplayed,setBeingDisplayed] = useState<boolean>(false);
-  useAuth();
-
+  // const [beingDisplayed,setBeingDisplayed] = useState<boolean>(false);
+  console.log("User before being Displayed",user);
+  const beingDisplayed = sessions.some((slot) => {
+  const d = new Date(slot.date);
+  const [hours, minutes] = slot.time.split(":").map(Number);
+  d.setHours(hours, minutes, 0, 0);
+  const isPastSlot = d < new Date();
+  const userRegistered = slot.users.length === 0 || slot.users.includes(user!.$id);
+  return slot.tag === "oneToOne" && userRegistered && !isPastSlot;
+});
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch expert data
+        console.log("Fetching data for expert with id:", params.id);
+
         const expertData = (await DBService.getUserbyId(params.id)) as User;
         console.log("Fetched expert data:", expertData);
         const sessions = (await DBService.getSessionsBySebiId(
@@ -83,7 +95,15 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
           registered: session.users.includes(user!.$id),
         }));
         setSessions(modifiedSessions);
-        if (user?.intros?.includes(params.id)) {
+      
+        const userAuth = await Auth.getUser();  
+        const userData = await DBService.getUserByEmail(userAuth?.email || "") as {
+          $id: string;
+          intros: string[];
+        };
+        console.log("Authenticated user data:", userAuth);
+        console.log("Fetched user data:", userData);
+        if (userData.intros?.includes(params.id)) {
           setSubscribed(true);
         }
         console.log(expertData);
@@ -107,11 +127,6 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
               refreshToken: expertData.refreshToken,
             } as Expert)
         );
-
-        // console.log(params.id)
-        if (!expertData || !expertData.expert) {
-          notFound();
-        }
 
         const intro = (await DBService.getSebiById(expertData.sebi.$id)) as {
           intro: string;
@@ -139,16 +154,17 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
         };
 
         setExpert(transformedExpert);
+
+          setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
-        notFound();
-      } finally {
-        setLoading(false);
-      }
     };
-
+  }
     fetchData();
-  }, [params.id, router, user]);
+    return () => {
+      console.log("Main user",user);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -160,7 +176,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
     );
   }
 
-  if (!expert) return notFound();
+  if (!expert) return ;
 
   // Mock upcoming intro session data (you can replace this with actual data from your DB)
   const upcomingIntroSession = {
@@ -425,7 +441,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                       return null;
                     }
 
-                    setBeingDisplayed(true);
+                    // setBeingDisplayed(true);
 
                     return (
                       <BookingModal
@@ -442,7 +458,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                           <Button
                             variant="outline"
                             className="rounded-2xl w-full h-full p-5 flex flex-col items-start justify-between text-left border bg-card hover:bg-white hover:shadow-lg transition-all"
-                            disabled={slot.registered}
+                            disabled={slot.users.includes(user!.$id)}
                           >
                             <div>
                               <div className="font-semibold text-lg text-primary mb-2">
@@ -490,7 +506,7 @@ export default function ExpertProfile({ params }: { params: { id: string } }) {
                                   </span>
                                 </div>
 
-                                {slot.registered && (
+                                {slot.users.includes(user!.$id) && (
                                   <span className="text-sm font-medium text-green-600">
                                     ✅ Already booked
                                   </span>

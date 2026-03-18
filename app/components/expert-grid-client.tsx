@@ -151,7 +151,7 @@ export function ExpertGridClient() {
   useEffect(() => {
     const fetchExperts = async () => {
       try {
-        const data = await DBService.getAllUsers() as User[];
+        const data = await DBService.getExperts() as User[];
 
         console.log("Fetched experts:", data);
         const expertUsers = data

@@ -11,7 +11,7 @@ class DBService{
         this.client
             .setEndpoint(conf.appwriteUrl)
             .setProject(conf.appwriteProjectId)
-            // .setDevKey("standard_1077c8e82772b3b2df7cce4443b045f0aa3d12fdeae175926f5ae956363b71370bb93af77578b96543bfbcc30bb2d27dce9039a0c36034a9801d90056281ca1bfe79b9ed7865428e99bec9595ce028b80d508bcc32d7c2c1a3ec9ed44f3b285517d77bdf9aaa0fe5798a6a066e62f126aef4399e168aa205bd6b9e35581af009");
+    
         this.databases = new Databases(this.client);
         this.account = new Account(this.client);
     }
@@ -106,8 +106,43 @@ class DBService{
                     Query.orderDesc('$updatedAt')
                 ]
             );
-            console.log(resp.documents);
-            return resp.documents;
+        const sebiIds = [...new Set(resp.documents.map(user => user.sebi).filter(Boolean))];
+        
+        // Fetch all sebi documents in one go
+        const sebiDocsMap = new Map();
+        if (sebiIds.length > 0) {
+            const sebiResponse = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                'sebi', // Replace with your actual sebi collection ID
+                [
+                    Query.limit(100) // Adjust limit as needed
+                ]
+            );
+            
+            // Create a map for easy lookup
+            sebiResponse.documents.forEach(doc => {
+                sebiDocsMap.set(doc.$id, doc);
+            });
+        }
+
+        // console.log("SEBI Documents Map:", sebiDocsMap);
+        
+        // Merge users with their sebi documents
+        const usersWithSebi = resp.documents.map(user => ({
+            ...user,
+            sebi: user.sebi ? sebiDocsMap.get(user.sebi) || null : null,
+            // $updatedAt: new Date(sebiDocsMap.get(user.sebi)?.$updatedAt || user.$updatedAt).toISOString(),
+        })) 
+
+        // console.log("Users with SEBI details:", usersWithSebi);
+
+        usersWithSebi.sort((a, b) => {
+            const dateA = a.$updatedAt ? new Date(a.$updatedAt).getTime() : 0;
+            const dateB = b.$updatedAt ? new Date(b.$updatedAt).getTime() : 0;
+            return dateB - dateA; // Descending order
+        });
+        
+        return usersWithSebi;
         }
         catch(err){
             console.log(err);
@@ -209,44 +244,46 @@ class DBService{
             // ]
         );
         
-        // Get all unique sebi IDs
-        const sebiIds = [...new Set(resp.documents.map(user => user.sebi).filter(Boolean))];
+        // // Get all unique sebi IDs
+        // const sebiIds = [...new Set(resp.documents.map(user => user.sebi).filter(Boolean))];
         
-        // Fetch all sebi documents in one go
-        const sebiDocsMap = new Map();
-        if (sebiIds.length > 0) {
-            const sebiResponse = await this.databases.listDocuments(
-                conf.appwriteDatabaseId,
-                'sebi', // Replace with your actual sebi collection ID
-                [
-                    Query.limit(100) // Adjust limit as needed
-                ]
-            );
+        // // Fetch all sebi documents in one go
+        // const sebiDocsMap = new Map();
+        // if (sebiIds.length > 0) {
+        //     const sebiResponse = await this.databases.listDocuments(
+        //         conf.appwriteDatabaseId,
+        //         'sebi', // Replace with your actual sebi collection ID
+        //         [
+        //             Query.limit(100) // Adjust limit as needed
+        //         ]
+        //     );
             
-            // Create a map for easy lookup
-            sebiResponse.documents.forEach(doc => {
-                sebiDocsMap.set(doc.$id, doc);
-            });
-        }
+        //     // Create a map for easy lookup
+        //     sebiResponse.documents.forEach(doc => {
+        //         sebiDocsMap.set(doc.$id, doc);
+        //     });
+        // }
 
-        // console.log("SEBI Documents Map:", sebiDocsMap);
+        // // console.log("SEBI Documents Map:", sebiDocsMap);
         
-        // Merge users with their sebi documents
-        const usersWithSebi = resp.documents.map(user => ({
-            ...user,
-            sebi: user.sebi ? sebiDocsMap.get(user.sebi) || null : null,
-            // $updatedAt: new Date(sebiDocsMap.get(user.sebi)?.$updatedAt || user.$updatedAt).toISOString(),
-        })) 
+        // // Merge users with their sebi documents
+        // const usersWithSebi = resp.documents.map(user => ({
+        //     ...user,
+        //     sebi: user.sebi ? sebiDocsMap.get(user.sebi) || null : null,
+        //     // $updatedAt: new Date(sebiDocsMap.get(user.sebi)?.$updatedAt || user.$updatedAt).toISOString(),
+        // })) 
 
-        // console.log("Users with SEBI details:", usersWithSebi);
+        // // console.log("Users with SEBI details:", usersWithSebi);
 
-        usersWithSebi.sort((a, b) => {
-            const dateA = a.$updatedAt ? new Date(a.$updatedAt).getTime() : 0;
-            const dateB = b.$updatedAt ? new Date(b.$updatedAt).getTime() : 0;
-            return dateB - dateA; // Descending order
-        });
+        // usersWithSebi.sort((a, b) => {
+        //     const dateA = a.$updatedAt ? new Date(a.$updatedAt).getTime() : 0;
+        //     const dateB = b.$updatedAt ? new Date(b.$updatedAt).getTime() : 0;
+        //     return dateB - dateA; // Descending order
+        // });
         
-        return usersWithSebi;
+        // // return usersWithSebi;
+
+        return resp.documents;
     }
     catch(err){
         console.log(err);

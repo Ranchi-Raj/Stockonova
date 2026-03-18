@@ -239,7 +239,8 @@ export default function ExpertPanel() {
           fee : newSession.fee,
           expertId : user?.$id || "",
           sebiID : user?.sebi || "",
-          gmeet: meetLink || ""
+          gmeet: data.data.eventId || ""
+          // gmeet : meetingData.data.eventId || ""
         })
 
         console.log("Session scheduled:", sessionScheduled)

@@ -42,7 +42,7 @@ export default function Razorpay({amount, name, phone, handleOrder, buttonText} 
         handler: function () {
 
           // Handle successful payment ---->Updating the wallet
-          toast.success("Payment Successful!");
+          toast.success("Successful! Updating...Please wait a minute.");
           handleOrder();
           // Send response to the backend for verification (optional)
         },
