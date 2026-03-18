@@ -94,6 +94,7 @@ export default function ExpertProfile() {
           ...session,
           registered: session.users.includes(user!.$id),
         }));
+        console.log("Modified Sessions with registration status:", modifiedSessions);
         setSessions(modifiedSessions);
       
         const userAuth = await Auth.getUser();  
@@ -269,7 +270,7 @@ export default function ExpertProfile() {
           if (session.$id === sessionId) {
             return {
               ...session,
-              registered: true,
+              users: [...session.users, userId],
             };
           }
           return session;
@@ -357,7 +358,7 @@ export default function ExpertProfile() {
               <h2 className="text-lg font-semibold">
                 {expert.intro.title
                   ? "Introductory Session on " + expert.intro.title
-                  : "Not Introductory Session has been Scheduled for the time being."}
+                  : "No Introductory Session has been Scheduled for the time being."}
               </h2>
               {expert.intro.title && (
                 <div>
