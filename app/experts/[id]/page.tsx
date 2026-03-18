@@ -58,6 +58,16 @@ interface User {
   image?: string;
 }
 
+const specializations = [
+    { value: "A", label: "Equity Research" },
+    { value: "B", label: "Portfolio Management" },
+    { value: "C", label: "Derivatives Trading" },
+    { value: "D", label: "Mutual Funds" },
+    { value: "E", label: "Financial Planning" },
+    { value: "F", label: "Risk Management" },
+    { value: "G", label: "Compliance & Regulations" },
+  ];
+
 export default function ExpertProfile() {
   useAuth();
   const param = useParams() as { id: string };
@@ -202,15 +212,7 @@ export default function ExpertProfile() {
           email: user?.email,
         }
       );
-
-      console.log(
-        "Session to be booked:",
-        expert.intro.$id,
-        "for user",
-        user!.$id
-      );
-
-      console.log("Expert intro id:", expert.$id, "User id:", user!.$id);
+      
       await DBService.addIntroUserToSave(expert.sebi, user!.$id);
       await DBService.addUserToSession({
         sessionId: expert.intro.$id,
@@ -222,6 +224,8 @@ export default function ExpertProfile() {
         sebiId: expert.sebi,
         intros: user?.intros || [],
       });
+
+      await DBService.addRegisteredSessionToUser(user!.$id, expert.intro.$id);
       // TODO : Send email to user with meeting link
 
       await axios.post("/api/send-email", {
@@ -341,7 +345,7 @@ export default function ExpertProfile() {
                 {
                   <div>
                     <li>
-                      <span>Area of expertise : {expert.specialization}</span>
+                      <span>Area of expertise : {specializations.find((s) => s.value === expert.specialization)?.label}</span>
                     </li>
                     <li>
                       <span>Experience : {expert.experience} years</span>

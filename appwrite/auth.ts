@@ -1,6 +1,6 @@
 import conf from '../conf/conf';
 import { Client, Account, ID, Databases, Query, OAuthProvider} from 'appwrite';
-
+import {toast} from "react-hot-toast"
 export class AuthService{
     client = new Client();
     databases;
@@ -63,6 +63,7 @@ export class AuthService{
         }
         catch(error){
             console.log("Login error");
+            toast.error("Login failed, please check your credentials and try again.");
            throw error
         }
     }

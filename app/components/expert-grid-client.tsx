@@ -57,6 +57,16 @@ function matchesExperience(expYears: number, expFilter: string) {
   return true
 }
 
+const specializations = [
+    { value: "A", label: "Equity Research" },
+    { value: "B", label: "Portfolio Management" },
+    { value: "C", label: "Derivatives Trading" },
+    { value: "D", label: "Mutual Funds" },
+    { value: "E", label: "Financial Planning" },
+    { value: "F", label: "Risk Management" },
+    { value: "G", label: "Compliance & Regulations" },
+  ];
+
 function FilterBar({ filters, onChange }: { filters: Filters; onChange: (filters: Partial<Filters>) => void }) {
   return (
     <div className="flex flex-wrap gap-4">
@@ -114,7 +124,7 @@ function ExpertCard({ expert }: { expert: Expert }) {
       <CardContent className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge className="rounded-full bg-secondary text-secondary-foreground">
-            {expert.specialization || "General"}
+            {specializations.find((s) => s.value === expert.specialization)?.label || "General"}
           </Badge>
           <span className="text-xs text-muted-foreground">
             {expert.experience || 0} yrs experience

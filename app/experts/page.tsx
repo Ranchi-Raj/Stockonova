@@ -18,6 +18,8 @@ export default function ExpertsPage() {
   console.log("Zustand User",user);
   const [sessions, setSessions] = useState<SessionInterface[]>([]);
 
+  
+
   const fetchSessions = async () => {
       const toKeep: string[] = [];
       if(user && user.$id){
